@@ -1,0 +1,22 @@
+{
+  "parent": "flying_things:recipes/root",
+  "rewards": {
+    "recipes": [
+      "flying_things:pillage_0", "flying_things:pillage_1"
+    ]
+  },
+  "criteria": {
+    "is_hero": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "minecraft:hero_of_the_village": {
+            "duration": {
+              "min": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

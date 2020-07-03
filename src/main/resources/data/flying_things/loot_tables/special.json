@@ -1,0 +1,19 @@
+{
+  "pools": [
+    {
+      "name": "flying_things:chest_treasure",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "flying_things:phial_of_animation",
+          "weight": 5,
+          "quality": 2
+        }, {
+          "type": "empty",
+          "weight": 95
+        }
+      ]
+    }
+  ]
+}

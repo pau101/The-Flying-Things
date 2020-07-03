@@ -1,0 +1,23 @@
+{
+  "parent": "flying_things:recipes/root",
+  "rewards": {
+    "recipes": [
+      "flying_things:enchanted_broom", "flying_things:magic_carpet_0", "flying_things:magic_carpet_1",
+      "flying_things:magic_carpet_2", "flying_things:magic_carpet_3", "flying_things:magic_carpet_4",
+      "flying_things:magic_carpet_5", "flying_things:magic_carpet_6", "flying_things:magic_carpet_7",
+      "flying_things:magic_carpet_8", "flying_things:colored_broom", "flying_things:pumpkin_broom"
+    ]
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "flying_things:phial_of_animation"
+          }
+        ]
+      }
+    }
+  }
+}

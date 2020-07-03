@@ -1,0 +1,20 @@
+{
+  "parent": "flying_things:recipes/root",
+  "rewards": {
+    "recipes": [
+      "flying_things:ocean_0", "flying_things:ocean_1", "flying_things:ocean_2", "flying_things:ocean_3"
+    ]
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:heart_of_the_sea"
+          }
+        ]
+      }
+    }
+  }
+}

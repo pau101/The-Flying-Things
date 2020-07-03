@@ -1,0 +1,9 @@
+{
+  "type": "crafting_shaped",
+  "pattern": ["212", "303", "212"],
+  "key": {
+    "0": {"item": "flying_things:phial_of_animation"}, "1": {"item": "minecraft:soul_sand"},
+    "2": {"item": "minecraft:yellow_carpet"}, "3": {"item": "minecraft:blue_carpet"}
+  },
+  "result": {"item": "flying_things:magic_carpet", "nbt": "{model_type:1}"}
+}

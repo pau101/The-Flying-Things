@@ -1,0 +1,9 @@
+{
+  "type": "crafting_shaped",
+  "pattern": ["212", "303", "212"],
+  "key": {
+    "0": {"item": "minecraft:heart_of_the_sea"}, "1": {"item": "minecraft:soul_sand"},
+    "2": {"item": "minecraft:cyan_carpet"}, "3": {"item": "minecraft:cyan_carpet"}
+  },
+  "result": {"item": "flying_things:magic_carpet", "nbt": "{model_type:16}"}
+}
