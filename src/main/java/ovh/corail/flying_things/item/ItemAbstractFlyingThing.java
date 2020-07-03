@@ -9,7 +9,6 @@ import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -17,7 +16,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.registries.ForgeRegistries;
-import ovh.corail.flying_things.ConfigFlyingThings;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.entity.EntityAbstractFlyingThing;
 import ovh.corail.flying_things.helper.NBTStackHelper;
 
@@ -38,27 +37,27 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
         if (player.isPassenger() || player.getCooldownTracker().hasCooldown(this)) {
-            return ActionResult.newResult(ActionResultType.FAIL, stack);
+            return ActionResult.resultFail(stack);
         }
         if (stack.getItem() != this) {
-            return ActionResult.newResult(ActionResultType.PASS, stack);
+            return ActionResult.resultPass(stack);
         }
         if (!world.isRemote) {
             MinecraftServer server = player.world.getServer();
             if (server != null && !server.isFlightAllowed()) {
                 player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"));
-                return ActionResult.newResult(ActionResultType.FAIL, stack);
+                return ActionResult.resultFail(stack);
             }
             if (!canFlyInDimension(world.dimension.getType())) {
                 player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", stack.getDisplayName()));
-                return ActionResult.newResult(ActionResultType.FAIL, stack);
+                return ActionResult.resultFail(stack);
             }
             player.getCooldownTracker().setCooldown(this, 100);
             EntityAbstractFlyingThing entity;
             try {
                 entity = (EntityAbstractFlyingThing) getEntityType().create(world);
             } catch (Exception e) {
-                return ActionResult.newResult(ActionResultType.FAIL, stack);
+                return ActionResult.resultFail(stack);
             }
             if (entity != null) {
                 entity.setModelType(getModelType(player.getHeldItem(hand)));
@@ -67,22 +66,22 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
                 if (stack.hasDisplayName()) {
                     entity.setCustomName(stack.getDisplayName());
                 }
-                entity.setPositionAndRotation(player.posX, player.posY, player.posZ, player.rotationYaw, 0f);
+                entity.setPositionAndRotation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, 0f);
                 entity.setRotationYawHead(player.rotationYaw);
                 onEntitySpawn(stack, entity);
                 world.addEntity(entity);
-                if (!player.isSneaking()) {
+                if (!player.isCrouching()) {
                     player.startRiding(entity);
                 }
                 player.setHeldItem(hand, ItemStack.EMPTY);
             }
         }
-        return ActionResult.newResult(ActionResultType.SUCCESS, stack);
+        return ActionResult.resultSuccess(stack);
     }
 
     @Override
     public boolean showDurabilityBar(ItemStack stack) {
-        return getEnergy(stack) < ConfigFlyingThings.General.getMaxEnergy();
+        return getEnergy(stack) < ConfigFlyingThings.shared_datas.maxEnergy.get();
     }
 
     @Override
@@ -92,22 +91,22 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack) {
-        return 1f - (double) getEnergy(stack) / (double) ConfigFlyingThings.General.getMaxEnergy();
+        return 1f - (double) getEnergy(stack) / (double) ConfigFlyingThings.shared_datas.maxEnergy.get();
     }
 
     public static void setEnergy(ItemStack stack, int energy) {
         if (stack.getItem() instanceof ItemAbstractFlyingThing) {
-            NBTStackHelper.setInteger(stack, "energy", MathHelper.clamp(energy, 0, ConfigFlyingThings.General.getMaxEnergy()));
+            NBTStackHelper.setInteger(stack, "energy", MathHelper.clamp(energy, 0, ConfigFlyingThings.shared_datas.maxEnergy.get()));
         }
     }
 
     private static int getEnergy(ItemStack stack) {
         if (stack.getItem() instanceof ItemAbstractFlyingThing) {
             if (NBTStackHelper.hasKeyName(stack, "energy")) {
-                return MathHelper.clamp(NBTStackHelper.getInteger(stack, "energy"), 0, ConfigFlyingThings.General.getMaxEnergy());
+                return MathHelper.clamp(NBTStackHelper.getInteger(stack, "energy"), 0, ConfigFlyingThings.shared_datas.maxEnergy.get());
             } else {
-                setEnergy(stack, ConfigFlyingThings.General.getMaxEnergy());
-                return ConfigFlyingThings.General.getMaxEnergy();
+                setEnergy(stack, ConfigFlyingThings.shared_datas.maxEnergy.get());
+                return ConfigFlyingThings.shared_datas.maxEnergy.get();
             }
         }
         return 0;
@@ -115,7 +114,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean isSelected) {
-        if (!world.isRemote && getEnergy(stack) < ConfigFlyingThings.General.getMaxEnergy() && entity.ticksExisted % (ConfigFlyingThings.general.timeToRecoverEnergy.get() * 20) == 0) {
+        if (!world.isRemote && getEnergy(stack) < ConfigFlyingThings.shared_datas.maxEnergy.get() && entity.ticksExisted % (ConfigFlyingThings.general.timeToRecoverEnergy.get() * 20) == 0) {
             setEnergy(stack, getEnergy(stack) + getActualRegen(stack, world, entity, slot, isSelected));
         }
     }
@@ -135,7 +134,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
             return false;
         }
         assert enchantment.getRegistryName() != null;
-        return ConfigFlyingThings.General.isSoulboundAllowed() && stack.getEnchantmentTagList().size() == 0 && enchantment.getRegistryName().equals(SOULBOUND_LOCATION);
+        return ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get() && stack.getEnchantmentTagList().size() == 0 && enchantment.getRegistryName().equals(SOULBOUND_LOCATION);
     }
 
     @Override
@@ -145,11 +144,11 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
 
     @Override
     public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-        return ConfigFlyingThings.General.isSoulboundAllowed() && stack.getEnchantmentTagList().size() == 0 && EnchantedBookItem.getEnchantments(book).size() == 1 && hasSoulbound(book);
+        return ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get() && stack.getEnchantmentTagList().size() == 0 && EnchantedBookItem.getEnchantments(book).size() == 1 && hasSoulbound(book);
     }
 
     public static void setSoulbound(ItemStack stack) {
-        if (!ConfigFlyingThings.General.isSoulboundAllowed()) {
+        if (!ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get()) {
             return;
         }
         Enchantment soulbound = ForgeRegistries.ENCHANTMENTS.getValue(SOULBOUND_LOCATION);
@@ -160,7 +159,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
     }
 
     private static boolean hasSoulbound(ItemStack stack) {
-        if (!ConfigFlyingThings.General.isSoulboundAllowed()) {
+        if (!ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get()) {
             return false;
         }
         Enchantment soulbound = ForgeRegistries.ENCHANTMENTS.getValue(SOULBOUND_LOCATION);

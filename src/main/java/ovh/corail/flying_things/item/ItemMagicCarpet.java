@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import ovh.corail.flying_things.ConfigFlyingThings;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.entity.EntityAbstractFlyingThing;
 import ovh.corail.flying_things.helper.Helper;
 import ovh.corail.flying_things.registry.ModEntities;
@@ -33,7 +33,7 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
     private static final int MAX_ID = 19;
 
     public ItemMagicCarpet() {
-        super("magic_carpet", getBuilder(true).maxStackSize(1).setTEISR(() -> TEISRMagicCarpet::new));
+        super("magic_carpet", getBuilder(true).maxStackSize(1).setISTER(() -> TEISRMagicCarpet::new));
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
             list.add(new TranslationTextComponent(MOD_ID + ".message.hold_key", "SHIFT").appendText(" ").appendSibling(new TranslationTextComponent(MOD_ID + ".message.for_more_infos")));
         } else {
             list.add(new TranslationTextComponent(MOD_ID + ".item.magic_carpet.desc1"));
-            list.add(new TranslationTextComponent(MOD_ID + ".item.magic_carpet.desc2", Minecraft.getInstance().gameSettings.keyBindSneak.getLocalizedName()));
+            list.add(new TranslationTextComponent(MOD_ID + ".item.magic_carpet.desc2", Helper.getNameForKeybindSneak()));
         }
         int id = getModelType(stack);
         if ((id == 18 || id == 19)) {

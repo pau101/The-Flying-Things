@@ -19,8 +19,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.FMLPlayMessages;
-import ovh.corail.flying_things.ConfigFlyingThings;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.helper.Helper;
+import ovh.corail.flying_things.helper.TimeHelper;
 import ovh.corail.flying_things.item.ItemAbstractFlyingThing;
 import ovh.corail.flying_things.item.ItemEnchantedBroom;
 import ovh.corail.flying_things.registry.ModEntities;
@@ -73,13 +74,13 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
 
     @Override
     public void tick() {
-        if (ConfigFlyingThings.general.allowSpecialRegen.get() && getEnergy() < ConfigFlyingThings.General.getMaxEnergy() && ticksExisted % 10 == 0 && world.isBlockLoaded(getPosition().down()) && world.getBlockState(getPosition().down()).getBlock() == Blocks.RED_MUSHROOM_BLOCK) {
-            if (!world.isRemote) {
+        if (ConfigFlyingThings.general.allowSpecialRegen.get() && getEnergy() < ConfigFlyingThings.shared_datas.maxEnergy.get() && TimeHelper.atInterval(this.ticksExisted, 10) && this.world.isBlockLoaded(getPosition().down()) && this.world.getBlockState(getPosition().down()).getBlock() == Blocks.RED_MUSHROOM_BLOCK) {
+            if (!this.world.isRemote) {
                 setEnergy(getEnergy() + 4);
-                world.playSound(null, getPosition(), SoundEvents.ENTITY_ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.5f, 0.5f);
+                this.world.playSound(null, getPosition(), SoundEvents.ENTITY_ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.5f, 0.5f);
             } else {
                 for (int i = 0; i < Helper.getRandom(10, 45); i++) {
-                    world.addParticle(ParticleTypes.WITCH, posX + rand.nextGaussian() * 0.4D, getBoundingBox().maxY + rand.nextGaussian() * 0.12999999523162842D, posZ + rand.nextGaussian() * 0.4D, 0.0D, 0.0D, 0.0D);
+                    this.world.addParticle(ParticleTypes.WITCH, getPosX() + this.rand.nextGaussian() * 0.4d, getBoundingBox().maxY + this.rand.nextGaussian() * 0.12999999523162842d, getPosZ() + this.rand.nextGaussian() * 0.4d, 0d, 0d, 0d);
                 }
             }
         }
@@ -153,17 +154,17 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
     }
 
     public int getHeadType() {
-        return dataManager.get(HEAD_TYPE);
+        return this.dataManager.get(HEAD_TYPE);
     }
 
     public void setHeadType(int headType) {
-        dataManager.set(HEAD_TYPE, headType);
+        this.dataManager.set(HEAD_TYPE, headType);
     }
 
     @Override
     protected void registerData() {
         super.registerData();
-        dataManager.register(HEAD_TYPE, 0);
+        this.dataManager.register(HEAD_TYPE, 0);
     }
 
     @Override

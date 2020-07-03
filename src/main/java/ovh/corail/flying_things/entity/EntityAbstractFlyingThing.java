@@ -19,7 +19,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos.PooledMutableBlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
@@ -31,8 +31,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.ItemHandlerHelper;
-import ovh.corail.flying_things.ConfigFlyingThings;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.helper.Helper;
+import ovh.corail.flying_things.helper.TimeHelper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -84,7 +85,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     protected void registerData() {
         this.dataManager.register(getDataTimeSinceHit(), 0);
         this.dataManager.register(getDataForwardDirection(), 1);
-        this.dataManager.register(getDataEnergy(), ConfigFlyingThings.General.getMaxEnergy());
+        this.dataManager.register(getDataEnergy(), ConfigFlyingThings.shared_datas.maxEnergy.get());
         this.dataManager.register(getDataDamageTaken(), 0f);
         this.dataManager.register(getDataModelType(), 0);
     }
@@ -122,11 +123,11 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     public void setEnergy(int energy) {
-        this.dataManager.set(getDataEnergy(), MathHelper.clamp(energy, 0, ConfigFlyingThings.General.getMaxEnergy()));
+        this.dataManager.set(getDataEnergy(), MathHelper.clamp(energy, 0, ConfigFlyingThings.shared_datas.maxEnergy.get()));
     }
 
     public int getEnergy() {
-        return MathHelper.clamp(this.dataManager.get(getDataEnergy()), 0, ConfigFlyingThings.General.getMaxEnergy());
+        return MathHelper.clamp(this.dataManager.get(getDataEnergy()), 0, ConfigFlyingThings.shared_datas.maxEnergy.get());
     }
 
     public void setDamageTaken(float damage) {
@@ -169,10 +170,10 @@ public abstract class EntityAbstractFlyingThing extends Entity {
             return true;
         }
         ItemStack stack = player.getHeldItem(hand);
-        if (!stack.isEmpty() && !isBeingRidden() && !player.isSneaking() && onInteractWithPlayerItem(stack, player, hand)) {
+        if (!stack.isEmpty() && !isBeingRidden() && !player.isCrouching() && onInteractWithPlayerItem(stack, player, hand)) {
             return true;
         }
-        if (player.isSneaking()) {
+        if (player.isCrouching()) {
             ItemHandlerHelper.giveItemToPlayer(player, getStack());
             remove();
             return true;
@@ -213,11 +214,11 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         super.tick();
         if (!this.world.isRemote) {
             if (getControllingPassenger() != null) {
-                if (getEnergy() > 0 && this.ticksExisted % (ConfigFlyingThings.general.timeToLoseEnergy.get() * 20) == 0) {
+                if (getEnergy() > 0 && TimeHelper.atInterval(this.ticksExisted, TimeHelper.tickFromSecond(ConfigFlyingThings.general.timeToLoseEnergy.get()))) {
                     setEnergy(getEnergy() - 1);
                 }
             } else {
-                if (getEnergy() < ConfigFlyingThings.General.getMaxEnergy() && this.ticksExisted % (ConfigFlyingThings.general.timeToRecoverEnergy.get() * 20) == 0) {
+                if (getEnergy() < ConfigFlyingThings.shared_datas.maxEnergy.get() && TimeHelper.atInterval(this.ticksExisted, TimeHelper.tickFromSecond(ConfigFlyingThings.general.timeToRecoverEnergy.get()))) {
                     setEnergy(getEnergy() + 1);
                 }
             }
@@ -228,10 +229,10 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         if (getDamageTaken() > 0f) {
             setDamageTaken(getDamageTaken() - 1f);
         }
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
-        final double speedMax = (getEnergy() > 0 ? ConfigFlyingThings.General.getSpeedMax() : ConfigFlyingThings.General.getSpeedMaxNoEnergy()) / 100d;
+        this.prevPosX = getPosX();
+        this.prevPosY = getPosY();
+        this.prevPosZ = getPosZ();
+        final double speedMax = (getEnergy() > 0 ? ConfigFlyingThings.shared_datas.speedMax.get() : ConfigFlyingThings.shared_datas.speedMaxNoEnergy.get()) / 100d;
         if (this.speed > speedMax) {
             double reducedMotion = speedMax / this.speed;
             setMotion(getMotion().mul(reducedMotion, reducedMotion, reducedMotion));
@@ -241,24 +242,24 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         double newPosX, newPosY, newPosZ;
         if (this.world.isRemote && !isBeingRidden()) {
             if (this.lerpSteps > 0) {
-                newPosX = this.posX + (this.lerpX - this.posX) / (double) this.lerpSteps;
-                newPosY = this.posY + (this.lerpY - this.posY) / (double) this.lerpSteps;
-                newPosZ = this.posZ + (this.lerpZ - this.posZ) / (double) this.lerpSteps;
+                newPosX = getPosX() + (this.lerpX - getPosX()) / (double) this.lerpSteps;
+                newPosY = getPosY() + (this.lerpY - getPosY()) / (double) this.lerpSteps;
+                newPosZ = getPosZ() + (this.lerpZ - getPosZ()) / (double) this.lerpSteps;
                 double d10 = MathHelper.wrapDegrees(this.lerpYaw - (double) this.rotationYaw);
                 this.rotationYaw = (float) ((double) this.rotationYaw + d10 / (double) this.lerpSteps);
                 this.rotationPitch = (float) ((double) this.rotationPitch + (this.lerpPitch - (double) this.rotationPitch) / (double) this.lerpSteps);
                 --this.lerpSteps;
                 setPositionAndRotation(newPosX, newPosY, newPosZ, this.rotationYaw, this.rotationPitch);
             } else {
-                newPosX = this.posX + getMotion().x;
-                newPosY = this.posY + getMotion().y;
-                newPosZ = this.posZ + getMotion().z;
+                newPosX = getPosX() + getMotion().x;
+                newPosY = getPosY() + getMotion().y;
+                newPosZ = getPosZ() + getMotion().z;
                 setPosition(newPosX, newPosY, newPosZ);
                 setRotation((float) ((double) this.rotationYaw + (this.lerpYaw - (double) this.rotationYaw)), (float) ((double) this.rotationPitch + (this.lerpPitch - (double) this.rotationPitch)));
                 setMotion(getMotion().mul(0.9900000095367432d, 1d, 0.9900000095367432d));
             }
         } else {
-            final double accelerationIncrement = ConfigFlyingThings.General.getAccelerationIncrement() / 100d;
+            final double accelerationIncrement = ConfigFlyingThings.shared_datas.accelerationIncrement.get() / 100d;
             if (getControllingPassenger() instanceof LivingEntity) {
                 if (((LivingEntity) getControllingPassenger()).moveForward < 0d) {
                     setMotion(getMotion().mul(1d - accelerationIncrement, 1d, 1d - accelerationIncrement));
@@ -281,14 +282,14 @@ public abstract class EntityAbstractFlyingThing extends Entity {
 
             this.speed = getMotion().length();
             // about the acceleration
-            final double accelerationMax = ConfigFlyingThings.General.getAccelerationMax() / 100d;
+            final double accelerationMax = ConfigFlyingThings.shared_datas.accelerationMax.get() / 100d;
             if (this.speed > initialSpeed && this.speedFactor < accelerationMax) {
-                this.speedFactor += (accelerationMax - this.speedFactor) / ConfigFlyingThings.General.getAccelerationMax();
+                this.speedFactor += (accelerationMax - this.speedFactor) / ConfigFlyingThings.shared_datas.accelerationMax.get();
                 if (this.speedFactor > accelerationMax) {
                     this.speedFactor = accelerationMax;
                 }
             } else if (this.speed < initialSpeed) {
-                this.speedFactor -= (this.speedFactor - accelerationIncrement) / ConfigFlyingThings.General.getAccelerationMax();
+                this.speedFactor -= (this.speedFactor - accelerationIncrement) / ConfigFlyingThings.shared_datas.accelerationMax.get();
                 if (this.speedFactor < accelerationIncrement) {
                     this.speedFactor = accelerationIncrement;
                 }
@@ -301,8 +302,8 @@ public abstract class EntityAbstractFlyingThing extends Entity {
             // about rotations
             this.rotationPitch = 0f;
             double rotYaw = this.rotationYaw;
-            double x = this.prevPosX - this.posX;
-            double z = this.prevPosZ - this.posZ;
+            double x = this.prevPosX - getPosX();
+            double z = this.prevPosZ - getPosZ();
             if (x * x + z * z > 0.001d) {
                 rotYaw = (float) (Math.atan2(z, x) * 180d / Math.PI) + 90f;
             }
@@ -334,9 +335,9 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         if (isHighSpeed) {
             bounds = bounds.grow(1d, 0.3d, 1d);
         }
-        PooledMutableBlockPos pos0 = PooledMutableBlockPos.retain(bounds.minX + 0.001d, bounds.minY + 0.001d, bounds.minZ + 0.001d);
-        PooledMutableBlockPos pos1 = PooledMutableBlockPos.retain(bounds.maxX - 0.001d, bounds.maxY - 0.001d, bounds.maxZ - 0.001d);
-        PooledMutableBlockPos pos2 = PooledMutableBlockPos.retain();
+        BlockPos.PooledMutable pos0 = BlockPos.PooledMutable.retain(bounds.minX + 0.001d, bounds.minY + 0.001d, bounds.minZ + 0.001d);
+        BlockPos.PooledMutable pos1 = BlockPos.PooledMutable.retain(bounds.maxX - 0.001d, bounds.maxY - 0.001d, bounds.maxZ - 0.001d);
+        BlockPos.PooledMutable pos2 = BlockPos.PooledMutable.retain();
         if (this.world.isAreaLoaded(pos0, pos1)) {
             for (int i = pos0.getX(); i <= pos1.getX(); ++i) {
                 for (int j = pos0.getY(); j <= pos1.getY(); ++j) {
@@ -398,9 +399,9 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         if (!isBeingRidden()) {
             this.lerpSteps = posRotationIncrements + 5;
         } else {
-            double d3 = x - this.posX;
-            double d4 = y - this.posY;
-            double d5 = z - this.posZ;
+            double d3 = x - getPosX();
+            double d4 = y - getPosY();
+            double d5 = z - getPosZ();
             double d6 = d3 * d3 + d4 * d4 + d5 * d5;
             if (d6 <= 1d) {
                 return;
@@ -414,7 +415,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     @Override
-    protected boolean canTriggerWalking() {
+    public boolean canTriggerWalking() {
         return false;
     }
 
@@ -487,9 +488,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         super.addPassenger(passenger);
         if (canPassengerSteer() && this.lerpSteps > 0) {
             this.lerpSteps = 0;
-            this.posX = this.lerpX;
-            this.posY = this.lerpY;
-            this.posZ = this.lerpZ;
+            setPosition(this.lerpX, this.lerpY, this.lerpZ);
             this.rotationYaw = (float) this.lerpYaw;
             this.rotationPitch = (float) this.lerpPitch;
         }

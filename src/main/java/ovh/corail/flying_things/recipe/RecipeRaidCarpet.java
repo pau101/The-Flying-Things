@@ -38,7 +38,7 @@ public class RecipeRaidCarpet extends ShapedRecipe {
 
     @Nullable
     private static PlayerEntity getPlayer(final CraftingInventory inventory) {
-        return inventory.field_70465_c.inventorySlots.stream() //eventHandler
+        return inventory.eventHandler.inventorySlots.stream()
                 .map(slot -> slot.inventory)
                 .filter(PlayerInventory.class::isInstance)
                 .map(PlayerInventory.class::cast)

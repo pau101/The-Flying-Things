@@ -10,17 +10,15 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'idea'
-//apply plugin: 'maven-publish'
 
-version = '1.8.5'
+version = '1.8.9'
 group = 'ovh.corail' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'flying_things'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
-    mappings channel: 'snapshot', version: '20190720-1.14.3'
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    mappings channel: 'snapshot', version: '20200514-1.15.1'
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -51,9 +49,9 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.14.4-28.1.1'
-    runtimeOnly fg.deobf("mezz.jei:jei-1.14.4:6.0.0.11")
-    compileOnly fg.deobf("mezz.jei:jei-1.14.4:6.0.0.11:api")
+    minecraft 'net.minecraftforge:forge:1.15.2-31.2.0'
+    runtimeOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.0.4")
+    compileOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.0.4:api")
 }
 
 jar {
@@ -69,21 +67,3 @@ jar {
         ])
     }
 }
-
-/*def reobfFile = file("$buildDir/reobfJar/output.jar")
-def reobfArtifact = artifacts.add('default', reobfFile) {
-    type 'jar'
-    builtBy 'reobfJar'
-}
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact reobfArtifact
-        }
-    }
-    repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
-        }
-    }
-}*/

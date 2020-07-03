@@ -21,7 +21,7 @@ public class ModItems extends Registrable {
     public static final ItemPumpkinStick pumpkinStick = new ItemPumpkinStick();
 
     @SubscribeEvent
-    public static void registerItemBlock(final RegistryEvent.Register<Item> event) {
+    public static void registerItem(final RegistryEvent.Register<Item> event) {
         registerForgeEntry(event.getRegistry(), enchantedBroom, enchantedBroom.getSimpleName());
         registerForgeEntry(event.getRegistry(), magicCarpet, magicCarpet.getSimpleName());
         registerForgeEntry(event.getRegistry(), phialOfAnimation, phialOfAnimation.getSimpleName());

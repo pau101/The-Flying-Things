@@ -1,85 +1,107 @@
 package ovh.corail.flying_things.model;
 
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.entity.model.RendererModel;
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.entity.model.SegmentedModel;
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.entity.EntityEnchantedBroom;
+import ovh.corail.flying_things.helper.Functions;
+import ovh.corail.flying_things.helper.TextureLocation;
 
 @OnlyIn(Dist.CLIENT)
-public class ModelEnchantedBroom<T extends EntityEnchantedBroom> extends EntityModel<T> {
-    public final RendererModel stick;
-    public final RendererModel head;
-    private final RendererModel NW;
-    private final RendererModel SW;
-    private final RendererModel SE;
-    private final RendererModel NE;
-    private final RendererModel NW_1;
-    private final RendererModel SW_1;
-    private final RendererModel SE_1;
-    private final RendererModel NE_1;
+public class ModelEnchantedBroom extends SegmentedModel<EntityEnchantedBroom> {
+    private final ModelRenderer stick;
+    public final ModelRenderer head;
+    private final ModelRenderer NW;
+    private final ModelRenderer SW;
+    private final ModelRenderer SE;
+    private final ModelRenderer NE;
+    private final ModelRenderer NW_1;
+    private final ModelRenderer SW_1;
+    private final ModelRenderer SE_1;
+    private final ModelRenderer NE_1;
+    private final ImmutableList<ModelRenderer> modelList;
 
     public ModelEnchantedBroom() {
         textureWidth = 32;
         textureHeight = 32;
-        SE_1 = new RendererModel(this, 0, 0);
-        SE_1.setRotationPoint(-0.5F, -0.25F, 4.0F);
-        SE_1.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(SE_1, -0.17453292519943295F, -0.17453292519943295F, 0.0F);
-        SW_1 = new RendererModel(this, 0, 0);
-        SW_1.setRotationPoint(-0.5F, -0.25F, 4.0F);
-        SW_1.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(SW_1, -0.17453292519943295F, 0.17453292519943295F, 0.0F);
-        SE = new RendererModel(this, 0, 0);
-        SE.setRotationPoint(-0.5F, 0.0F, 4.0F);
-        SE.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(SE, -0.3490658503988659F, -0.3490658503988659F, 0.0F);
-        NE_1 = new RendererModel(this, 0, 0);
-        NE_1.setRotationPoint(-0.5F, -0.25F, 4.0F);
-        NE_1.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(NE_1, 0.17453292519943295F, -0.17453292519943295F, 0.0F);
-        NW = new RendererModel(this, 0, 0);
-        NW.setRotationPoint(0.0F, -0.5F, 4.0F);
-        NW.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(NW, 0.3490658503988659F, 0.3490658503988659F, 0.0F);
-        stick = new RendererModel(this, -2, 7);
-        stick.setRotationPoint(-0.5F, -0.5F, -20.0F);
-        stick.addBox(0.0F, 0.0F, 0.0F, 1, 1, 24, 0.0F);
-        SW = new RendererModel(this, 0, 0);
-        SW.setRotationPoint(0.0F, 0.0F, 4.0F);
-        SW.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(SW, -0.3490658503988659F, 0.3490658503988659F, 0.0F);
-        NE = new RendererModel(this, 0, 0);
-        NE.setRotationPoint(-0.5F, -0.5F, 4.0F);
-        NE.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(NE, 0.3490658503988659F, -0.3490658503988659F, 0.0F);
-        NW_1 = new RendererModel(this, 0, 0);
-        NW_1.setRotationPoint(-0.5F, -0.25F, 4.0F);
-        NW_1.addBox(0.0F, 0.0F, 0.0F, 1, 1, 10, 0.0F);
-        setRotateAngle(NW_1, 0.17453292519943295F, 0.17453292519943295F, 0.0F);
-        textureWidth = 16;
-        textureHeight = 16;
-        head = new RendererModel(this, 0, 0);
+        SE_1 = new ModelRenderer(this, 0, 0);
+        SE_1.setRotationPoint(-0.5f, -0.25f, 4f);
+        SE_1.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(SE_1, -0.17453292519943295f, -0.17453292519943295f, 0f);
+        SW_1 = new ModelRenderer(this, 0, 0);
+        SW_1.setRotationPoint(-0.5f, -0.25f, 4f);
+        SW_1.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(SW_1, -0.17453292519943295f, 0.17453292519943295f, 0f);
+        SE = new ModelRenderer(this, 0, 0);
+        SE.setRotationPoint(-0.5f, 0f, 4f);
+        SE.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(SE, -0.3490658503988659f, -0.3490658503988659f, 0f);
+        NE_1 = new ModelRenderer(this, 0, 0);
+        NE_1.setRotationPoint(-0.5f, -0.25f, 4f);
+        NE_1.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(NE_1, 0.17453292519943295f, -0.17453292519943295f, 0f);
+        NW = new ModelRenderer(this, 0, 0);
+        NW.setRotationPoint(0f, -0.5f, 4f);
+        NW.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(NW, 0.3490658503988659f, 0.3490658503988659f, 0f);
+        stick = new ModelRenderer(this, -2, 7);
+        stick.setRotationPoint(-0.5f, -0.5f, -20f);
+        stick.addBox(0f, 0f, 0f, 1, 1, 24, 0f);
+        SW = new ModelRenderer(this, 0, 0);
+        SW.setRotationPoint(0f, 0f, 4f);
+        SW.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(SW, -0.3490658503988659f, 0.3490658503988659f, 0f);
+        NE = new ModelRenderer(this, 0, 0);
+        NE.setRotationPoint(-0.5f, -0.5f, 4f);
+        NE.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(NE, 0.3490658503988659f, -0.3490658503988659f, 0f);
+        NW_1 = new ModelRenderer(this, 0, 0);
+        NW_1.setRotationPoint(-0.5f, -0.25f, 4f);
+        NW_1.addBox(0f, 0f, 0f, 1, 1, 10, 0f);
+        setRotateAngle(NW_1, 0.17453292519943295f, 0.17453292519943295f, 0f);
+        head = new ModelRenderer(16, 16, 0, 0);
         head.setRotationPoint(-2f, -2f, 0f);
-        head.addBox(0.0F, 0.0F, -24.0F, 4, 4, 4, 0f);
+        head.addBox(0f, 0f, -24f, 4, 4, 4, 0f);
+        ImmutableList.Builder<ModelRenderer> builder = ImmutableList.builder();
+        builder.add(SE_1, SW_1, SE, NE_1, NW, SW, NE, NW_1, stick); //head
+        this.modelList = builder.build();
     }
 
     @Override
-    public void render(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        //setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, entity);
-        SE_1.render(scale);
-        SW_1.render(scale);
-        SE.render(scale);
-        NE_1.render(scale);
-        NW.render(scale);
-        SW.render(scale);
-        NE.render(scale);
-        NW_1.render(scale);
+    public void setRotationAngles(EntityEnchantedBroom entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
     }
 
-    private void setRotateAngle(RendererModel modelRenderer, float x, float y, float z) {
+    @Override
+    public void render(MatrixStack matrixStack, IVertexBuilder iVertexBuilder, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        this.stick.render(matrixStack, iVertexBuilder, packedLight, packedOverlay, red, green, blue, alpha);
+        IRenderTypeBuffer.Impl iRenderTypeBuffer = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+        IVertexBuilder brushVertexBuilder = Functions.VERTEX_BUILDER_CUTOUT.apply(iRenderTypeBuffer, TextureLocation.TEXTURE_HAY);
+        getParts().forEach(part -> {
+            if (part != this.stick) {
+                part.render(matrixStack, brushVertexBuilder, packedLight, packedOverlay, red, green, blue, alpha);
+            }
+        });
+        if (ConfigFlyingThings.client.renderEffect.get()) {
+            IVertexBuilder ivertexbuilder2 = Functions.VERTEX_BUILDER_GLINT.apply(iRenderTypeBuffer);
+            getParts().forEach(part -> part.render(matrixStack, ivertexbuilder2, packedLight, packedOverlay, red, green, blue, alpha));
+        }
+    }
+
+    private void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.rotateAngleX = x;
         modelRenderer.rotateAngleY = y;
         modelRenderer.rotateAngleZ = z;
+    }
+
+    @Override
+    public Iterable<ModelRenderer> getParts() {
+        return this.modelList;
     }
 }

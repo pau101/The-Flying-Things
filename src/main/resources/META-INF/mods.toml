@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[28,)" #mandatory (24 is current forge version)
+loaderVersion="[31,)" #mandatory
 issueTrackerURL="https://minecraft.curseforge.com/projects/the-flying-things/issues/" #optional
 [[mods]] #mandatory
 modId="flying_things" #mandatory
@@ -16,12 +16,12 @@ The Flying Things introduces enchanted brooms and magic carpets that can be ridd
 [[dependencies.flying_things]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[28.1.1,)" #mandatory
+    versionRange="[31.2.0,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.flying_things]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.14.4,1.15)"
+    versionRange="[1.15.2,1.16)"
     ordering="NONE"
     side="BOTH"

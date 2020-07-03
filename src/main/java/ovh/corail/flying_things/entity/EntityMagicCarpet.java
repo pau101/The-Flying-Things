@@ -15,8 +15,9 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.fml.network.FMLPlayMessages;
-import ovh.corail.flying_things.ConfigFlyingThings;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.helper.Helper;
+import ovh.corail.flying_things.helper.TimeHelper;
 import ovh.corail.flying_things.item.ItemAbstractFlyingThing;
 import ovh.corail.flying_things.registry.ModEntities;
 import ovh.corail.flying_things.registry.ModItems;
@@ -58,7 +59,7 @@ public class EntityMagicCarpet extends EntityAbstractFlyingThing {
 
     @Override
     public boolean canFlyInDimension(DimensionType dimensionType) {
-        if (world.isRemote) {
+        if (this.world.isRemote) {
             return true;
         }
         return !ConfigFlyingThings.deniedDimensionToFly.deniedDimensionCarpet.get().contains(Helper.getDimensionString(dimensionType));
@@ -88,12 +89,12 @@ public class EntityMagicCarpet extends EntityAbstractFlyingThing {
 
     @Override
     public void tick() {
-        if (ConfigFlyingThings.general.allowSpecialRegen.get() && getEnergy() < ConfigFlyingThings.General.getMaxEnergy() && ticksExisted % 10 == 0 && world.isBlockLoaded(getPosition().down()) && world.getBlockState(getPosition().down()).getBlock() == Blocks.SOUL_SAND) {
-            if (!world.isRemote) {
+        if (ConfigFlyingThings.general.allowSpecialRegen.get() && getEnergy() < ConfigFlyingThings.shared_datas.maxEnergy.get() && TimeHelper.atInterval(this.ticksExisted, 10) && this.world.isBlockLoaded(getPosition().down()) && this.world.getBlockState(getPosition().down()).getBlock() == Blocks.SOUL_SAND) {
+            if (!this.world.isRemote) {
                 setEnergy(getEnergy() + 4);
-                world.playSound(null, getPosition(), SoundEvents.ENTITY_ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.5f, 0.5f);
+                this.world.playSound(null, getPosition(), SoundEvents.ENTITY_ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.5f, 0.5f);
             } else {
-                IntStream.range(0, Helper.getRandom(10, 45)).forEach(i -> world.addParticle(ParticleTypes.WITCH, posX + rand.nextGaussian() * 0.4D, getBoundingBox().maxY + rand.nextGaussian() * 0.12999999523162842D, posZ + rand.nextGaussian() * 0.4D, 0.0D, 0.0D, 0.0D));
+                IntStream.range(0, Helper.getRandom(10, 45)).forEach(i -> this.world.addParticle(ParticleTypes.WITCH, getPosX() + this.rand.nextGaussian() * 0.4D, getBoundingBox().maxY + this.rand.nextGaussian() * 0.12999999523162842d, getPosZ() + this.rand.nextGaussian() * 0.4d, 0d, 0d, 0d));
             }
         }
         super.tick();

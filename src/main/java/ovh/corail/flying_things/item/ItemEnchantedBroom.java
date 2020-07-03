@@ -1,7 +1,6 @@
 package ovh.corail.flying_things.item;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -16,7 +15,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import ovh.corail.flying_things.ConfigFlyingThings;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.entity.EntityAbstractFlyingThing;
 import ovh.corail.flying_things.entity.EntityEnchantedBroom;
 import ovh.corail.flying_things.helper.Helper;
@@ -32,7 +31,7 @@ import static ovh.corail.flying_things.ModFlyingThings.MOD_ID;
 public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
 
     public ItemEnchantedBroom() {
-        super("enchanted_broom", getBuilder(true).maxStackSize(1).setTEISR(() -> TEISREnchantedBroom::new));
+        super("enchanted_broom", getBuilder(true).maxStackSize(1).setISTER(() -> TEISREnchantedBroom::new));
     }
 
     @Override
@@ -70,7 +69,7 @@ public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
         } else {
             list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc1"));
             list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc2"));
-            list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc3", Minecraft.getInstance().gameSettings.keyBindSneak.getLocalizedName()));
+            list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc3", Helper.getNameForKeybindSneak()));
         }
     }
 

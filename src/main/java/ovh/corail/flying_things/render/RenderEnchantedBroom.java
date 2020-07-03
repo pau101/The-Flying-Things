@@ -1,24 +1,26 @@
 package ovh.corail.flying_things.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.ICamera;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import ovh.corail.flying_things.ConfigFlyingThings;
 import ovh.corail.flying_things.entity.EntityEnchantedBroom;
 import ovh.corail.flying_things.helper.TextureLocation;
 import ovh.corail.flying_things.model.ModelEnchantedBroom;
 
+import static ovh.corail.flying_things.helper.Functions.VERTEX_BUILDER_CUTOUT;
+
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("FieldCanBeLocal")
-public class RenderEnchantedBroom<T extends EntityEnchantedBroom> extends EntityRenderer<T> {
-    private final ModelEnchantedBroom<T> model = new ModelEnchantedBroom<>();
-    private final float scale = 0.0625f;
+public class RenderEnchantedBroom extends EntityRenderer<EntityEnchantedBroom> {
+    private static final ModelEnchantedBroom model = new ModelEnchantedBroom();
 
     public RenderEnchantedBroom(EntityRendererManager renderManager) {
         super(renderManager);
@@ -26,109 +28,53 @@ public class RenderEnchantedBroom<T extends EntityEnchantedBroom> extends Entity
     }
 
     @Override
-    public ResourceLocation getEntityTexture(T entity) {
+    public void render(EntityEnchantedBroom entity, float entityYaw, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int light) {
+        render(entity, entityYaw, entity.ticksExisted, partialTicks, matrixStack, iRenderTypeBuffer, light, false);
+        super.render(entity, entityYaw, partialTicks, matrixStack, iRenderTypeBuffer, light);
+    }
+
+    @Override
+    public ResourceLocation getEntityTexture(EntityEnchantedBroom entity) {
+        return getTexture(entity);
+    }
+
+    private static ResourceLocation getTexture(EntityEnchantedBroom entity) {
         return TextureLocation.TEXTURE_CONCRETE[(entity.getModelType() < TextureLocation.TEXTURE_CONCRETE.length ? entity.getModelType() : 12)];
     }
 
     @Override
-    public void doRender(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
-        renderBroom(entity, x, y, z, entityYaw, partialTicks, false);
+    public boolean shouldRender(EntityEnchantedBroom entity, ClippingHelperImpl camera, double camX, double camY, double camZ) {
+        return entity.world == null || super.shouldRender(entity, camera, camX, camY, camZ);
     }
 
-    @Override
-    public boolean shouldRender(T livingEntity, ICamera camera, double camX, double camY, double camZ) {
-        return true;
-    }
+    public static void render(EntityEnchantedBroom entity, float entityYaw, int ticksExisted, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int packedLight, boolean isTEISR) {
+        matrixStack.push();
 
-    void renderBroom(T entity, double x, double y, double z, float entityYaw, float partialTicks, boolean isItemStack) {
-        float ageInTicks, rotationYawHead, rotationYaw, rotationPitch;
-        if (isItemStack) {
-            ageInTicks = Minecraft.getInstance().player.ticksExisted + partialTicks;
-            rotationYawHead = rotationYaw = rotationPitch = 0f;
-        } else {
-            ageInTicks = entity.ticksExisted + partialTicks;
-            rotationYawHead = entity.getRotationYawHead();
-            rotationYaw = entity.rotationYaw;
-            rotationPitch = 0f;
+        if (!isTEISR) {
+            matrixStack.translate(0d, 0.2d, 0d);
         }
-        float limbSwing = ageInTicks / 80f;
-
-        GlStateManager.pushMatrix();
-        GlStateManager.enableCull();
-
-        if (!isItemStack) {
-            GlStateManager.translated(x, y + 0.2d, z);
-        }
-        GlStateManager.rotatef(180f - entityYaw, 0f, 1f, 0f);
-        if (!isItemStack) {
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(180f - entityYaw));
+        if (!isTEISR) {
             float f = (float) entity.getTimeSinceHit() - partialTicks;
             float f1 = entity.getDamageTaken() - partialTicks;
             if (f1 < 0f) {
                 f1 = 0f;
             }
             if (f > 0f) {
-                GlStateManager.rotatef(MathHelper.sin(f) * f * f1 / 10f * (float) entity.getForwardDirection(), 1f, 0f, 0f);
+                matrixStack.rotate(Vector3f.XP.rotationDegrees(MathHelper.sin(f) * f * f1 / 10f * (float) entity.getForwardDirection()));
             }
         }
 
-        GlStateManager.pushMatrix();
-        bindTexture(TextureLocation.TEXTURE_HAY);
-        model.render(entity, limbSwing, 0f, ageInTicks, rotationYawHead, rotationPitch, scale);
-        GlStateManager.popMatrix();
-
-        GlStateManager.pushMatrix();
-        bindEntityTexture(entity);
-        model.stick.render(scale);
-        GlStateManager.popMatrix();
+        model.render(matrixStack, VERTEX_BUILDER_CUTOUT.apply(iRenderTypeBuffer, getTexture(entity)), packedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
 
         if (entity.getHeadType() > 0) {
-            GlStateManager.pushMatrix();
-            bindTexture(TextureLocation.TEXTURE_SKULL[entity.getHeadType() - 1]);
-            GlStateManager.rotatef(180f, 0f, 0f, 1f);
-            model.head.render(scale);
-            GlStateManager.popMatrix();
+            matrixStack.push();
+            matrixStack.rotate(Vector3f.ZP.rotationDegrees(180f));
+            model.head.render(matrixStack, VERTEX_BUILDER_CUTOUT.apply(iRenderTypeBuffer, TextureLocation.TEXTURE_SKULL[entity.getHeadType() - 1]), packedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+            matrixStack.pop();
         }
-
-        doRenderLayer(entity, limbSwing, 0f, ageInTicks, rotationYawHead, rotationPitch);
-        GlStateManager.disableCull();
-        GlStateManager.popMatrix();
-        if (!isItemStack) {
-            super.doRender(entity, x, y, z, entityYaw, partialTicks);
-        }
+        matrixStack.pop();
     }
 
-    private void doRenderLayer(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!ConfigFlyingThings.client.renderEffect.get()) {
-            return;
-        }
-        GlStateManager.pushMatrix();
-        boolean flag = !entity.isInvisible();
-        GlStateManager.depthMask(!flag);
-        bindTexture(TextureLocation.TEXTURE_EFFECT);
-        GlStateManager.matrixMode(5890);
-        GlStateManager.loadIdentity();
-        GlStateManager.translatef(ageInTicks * 0.01f, ageInTicks * 0.01f, 0f);
-        GlStateManager.matrixMode(5888);
-        GlStateManager.enableBlend();
-        GlStateManager.color4f(0.5f, 0.5f, 0.5f, 1f);
-        GlStateManager.disableLighting();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-        this.model.setModelAttributes(this.model);
 
-        Minecraft.getInstance().gameRenderer.setupFogColor(true);
-        this.model.render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, this.scale);
-        this.model.stick.render(this.scale);
-        Minecraft.getInstance().gameRenderer.setupFogColor(false);
-
-        GlStateManager.matrixMode(5890);
-        GlStateManager.loadIdentity();
-        GlStateManager.matrixMode(5888);
-        GlStateManager.enableLighting();
-        //GlStateManager.disableBlend();
-        GlStateManager.depthMask(flag);
-
-        GlStateManager.color4f(1f, 1f, 1f, 1f);
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.popMatrix();
-    }
 }
