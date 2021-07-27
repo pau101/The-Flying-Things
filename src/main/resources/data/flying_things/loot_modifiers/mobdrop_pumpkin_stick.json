@@ -1,0 +1,11 @@
+{
+    "conditions": [
+        {
+            "condition": "flying_things:is_monster"
+        },
+        {
+            "condition": "minecraft:killed_by_player"
+        }
+    ],
+    "item": "flying_things:pumpkin_stick"
+}

@@ -1,17 +1,21 @@
 package ovh.corail.flying_things.gui;
 
+import net.minecraft.client.AbstractOption;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.OptionButton;
-import net.minecraft.client.settings.AbstractOption;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
+
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 @OnlyIn(Dist.CLIENT)
 public class IntegerConfigOption extends AbstractOption {
@@ -43,16 +47,16 @@ public class IntegerConfigOption extends AbstractOption {
             pressable.setMessage(getOptionName());
         }) {
             @Override
-            public void renderButton(int mouseX, int mouseY, float partialTicks) {
+            public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
                 Minecraft minecraft = Minecraft.getInstance();
-                renderBg(minecraft, mouseX, mouseY);
+                renderBg(matrixStack, minecraft, mouseX, mouseY);
                 int j = isHovered() ? 0xff897235 : 0xffffffff;
-                drawCenteredString(minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
+                drawCenteredString(matrixStack, minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
             }
         };
     }
 
-    private String getOptionName() {
-        return this.functionName.apply(get());
+    private ITextComponent getOptionName() {
+        return new StringTextComponent(this.functionName.apply(get()));
     }
 }

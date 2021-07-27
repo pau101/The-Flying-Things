@@ -1,5 +1,6 @@
 package ovh.corail.flying_things.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -33,11 +34,11 @@ public class GuiOverlayEnergy extends Screen {
         if (Helper.isRidingFlyingThing(player)) {
             EntityAbstractFlyingThing mount = ((EntityAbstractFlyingThing) player.getRidingEntity());
             assert mount != null;
-            drawBars(this, this.guiLeft, this.height * ConfigFlyingThings.client.barHeightPos.get() / 100, this.barLength, mount.getEnergy(), mount.speed);
+            drawBars(new MatrixStack(), this, this.guiLeft, this.height * ConfigFlyingThings.client.barHeightPos.get() / 100, this.barLength, mount.getEnergy(), mount.speed);
         }
     }
 
-    static void drawBars(Screen screen, int guiLeft, int guiTop, int barWidth, int energy, double mountSpeed) {
+    static void drawBars(MatrixStack matrixstack, Screen screen, int guiLeft, int guiTop, int barWidth, int energy, double mountSpeed) {
         Minecraft mc = Minecraft.getInstance();
         RenderSystem.enableBlend();
         mc.getTextureManager().bindTexture(TextureLocation.BARS);
@@ -45,13 +46,13 @@ public class GuiOverlayEnergy extends Screen {
         int filled = (int) (energy * barWidth / (double) ConfigFlyingThings.shared_datas.maxEnergy.get()) + 1;
         float[] colors = Helper.getRGBColor3F(ConfigFlyingThings.client.barColorEnergy.get());
         RenderSystem.color4f(colors[0], colors[1], colors[2], 0.5f);
-        screen.blit(guiLeft, guiTop, 0, colorPosY, barWidth, 5);
+        screen.blit(matrixstack, guiLeft, guiTop, 0, colorPosY, barWidth, 5);
         if (filled > 0) {
             RenderSystem.color4f(colors[0], colors[1], colors[2], 1f);
-            screen.blit(guiLeft, guiTop, 0, colorPosY + 5, filled, 5);
+            screen.blit(matrixstack, guiLeft, guiTop, 0, colorPosY + 5, filled, 5);
         }
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        screen.blit(guiLeft, guiTop, 0, ConfigFlyingThings.client.barGraduationEnergy.get().ordinal() * 10 + 80, barWidth, 5);
+        screen.blit(matrixstack, guiLeft, guiTop, 0, ConfigFlyingThings.client.barGraduationEnergy.get().ordinal() * 10 + 80, barWidth, 5);
 
         float speed = (float) mountSpeed * 100f;
         float speedMax = (float) ConfigFlyingThings.shared_datas.speedMax.get();
@@ -62,17 +63,17 @@ public class GuiOverlayEnergy extends Screen {
         }
         colors = Helper.getRGBColor3F(ConfigFlyingThings.client.barColorSpeed.get());
         RenderSystem.color4f(colors[0], colors[1], colors[2], 0.5f);
-        screen.blit(guiLeft, guiTop + 7, 0, colorPosY, barWidth, 5);
+        screen.blit(matrixstack, guiLeft, guiTop + 7, 0, colorPosY, barWidth, 5);
         if (filled > 0) {
             RenderSystem.color4f(colors[0], colors[1], colors[2], 1f);
-            screen.blit(guiLeft, guiTop + 7, 0, colorPosY + 5, filled, 5);
+            screen.blit(matrixstack, guiLeft, guiTop + 7, 0, colorPosY + 5, filled, 5);
         }
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        screen.blit(guiLeft, guiTop + 7, 0, ConfigFlyingThings.client.barGraduationSpeed.get().ordinal() * 10 + 80, barWidth, 5);
+        screen.blit(matrixstack, guiLeft, guiTop + 7, 0, ConfigFlyingThings.client.barGraduationSpeed.get().ordinal() * 10 + 80, barWidth, 5);
         if (ConfigFlyingThings.client.barValue.get()) {
-            fill(guiLeft, guiTop + 14, guiLeft + 130, guiTop + 40, 0x20000000);
-            screen.drawString(mc.fontRenderer, "Speed : " + MathHelper.floor(Math.min(mountSpeed * 100d, ConfigFlyingThings.shared_datas.speedMax.get())) + " / " + ConfigFlyingThings.shared_datas.speedMax.get(), guiLeft + 10, guiTop + 18, 0xa0ffffff);
-            screen.drawString(mc.fontRenderer, "Energy : " + energy + " / " + ConfigFlyingThings.shared_datas.maxEnergy.get(), guiLeft + 10, guiTop + 28, 0xa0ffffff);
+            fill(matrixstack, guiLeft, guiTop + 14, guiLeft + 130, guiTop + 40, 0x20000000);
+            drawString(matrixstack, mc.fontRenderer, "Speed : " + MathHelper.floor(Math.min(mountSpeed * 100d, ConfigFlyingThings.shared_datas.speedMax.get())) + " / " + ConfigFlyingThings.shared_datas.speedMax.get(), guiLeft + 10, guiTop + 18, 0xa0ffffff);
+            drawString(matrixstack, mc.fontRenderer, "Energy : " + energy + " / " + ConfigFlyingThings.shared_datas.maxEnergy.get(), guiLeft + 10, guiTop + 28, 0xa0ffffff);
         }
         RenderSystem.defaultBlendFunc();
     }

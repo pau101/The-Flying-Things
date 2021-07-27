@@ -15,17 +15,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.IndirectEntityDamageSource;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
@@ -55,7 +57,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     public EntityAbstractFlyingThing(EntityType<?> entityType, World world, double x, double y, double z) {
         this(entityType, world);
         setPosition(x, y, z);
-        setMotion(Vec3d.ZERO);
+        setMotion(Vector3d.ZERO);
         this.prevPosX = x;
         this.prevPosY = y;
         this.prevPosZ = z;
@@ -77,7 +79,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
 
     public abstract ItemStack getStack();
 
-    public abstract boolean canFlyInDimension(DimensionType dimensionType);
+    public abstract boolean canFlyInDimension(RegistryKey<World> dimensionType);
 
     protected abstract boolean onInteractWithPlayerItem(ItemStack stack, PlayerEntity player, Hand hand);
 
@@ -165,33 +167,33 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     @Override
-    public boolean processInitialInteract(PlayerEntity player, Hand hand) {
+    public ActionResultType processInitialInteract(PlayerEntity player, Hand hand) {
         if (this.world.isRemote) {
-            return true;
+            return ActionResultType.SUCCESS;
         }
         ItemStack stack = player.getHeldItem(hand);
         if (!stack.isEmpty() && !isBeingRidden() && !player.isCrouching() && onInteractWithPlayerItem(stack, player, hand)) {
-            return true;
+            return ActionResultType.SUCCESS;
         }
         if (player.isCrouching()) {
             ItemHandlerHelper.giveItemToPlayer(player, getStack());
             remove();
-            return true;
+            return ActionResultType.SUCCESS;
         } else {
             assert player.world.getServer() != null;
             if (player.world.getServer().isFlightAllowed()) {
-                if (canFlyInDimension(this.world.dimension.getType())) {
-                    return player.startRiding(this);
+                if (canFlyInDimension(this.world.getDimensionKey())) {
+                    return player.startRiding(this) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
                 } else {
-                    player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", getDisplayName()));
-                    return false;
+                    player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", getDisplayName()), Util.DUMMY_UUID);
+                    return ActionResultType.FAIL;
                 }
             } else if (hand == Hand.MAIN_HAND) {
-                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"));
-                return false;
+                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"), Util.DUMMY_UUID);
+                return ActionResultType.FAIL;
             }
         }
-        return false;
+        return ActionResultType.FAIL;
     }
 
     @Override
@@ -272,12 +274,12 @@ public abstract class EntityAbstractFlyingThing extends Entity {
                     } else if (dirY < 0d) {
                         dirY *= 0.5d;
                     }
-                    setMotion(new Vec3d(getMotion().x + dirX * this.speedFactor * 0.1d, dirY * this.speedFactor * 2d, getMotion().z + dirZ * this.speedFactor * 0.1d));
+                    setMotion(new Vector3d(getMotion().x + dirX * this.speedFactor * 0.1d, dirY * this.speedFactor * 2d, getMotion().z + dirZ * this.speedFactor * 0.1d));
                 }
             } else if (!isBeingRidden()) {
                 double moX = getMotion().x * 0.9d;
                 double moZ = getMotion().z * 0.9d;
-                setMotion(new Vec3d(Math.abs(moX) < 0.01d ? 0d : moX, getMotion().y - (!this.onGround ? 0.2d : 0d), Math.abs(moZ) < 0.01d ? 0d : moZ));
+                setMotion(new Vector3d(Math.abs(moX) < 0.01d ? 0d : moX, getMotion().y - (!this.onGround ? 0.2d : 0d), Math.abs(moZ) < 0.01d ? 0d : moZ));
             }
 
             this.speed = getMotion().length();
@@ -335,9 +337,9 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         if (isHighSpeed) {
             bounds = bounds.grow(1d, 0.3d, 1d);
         }
-        BlockPos.PooledMutable pos0 = BlockPos.PooledMutable.retain(bounds.minX + 0.001d, bounds.minY + 0.001d, bounds.minZ + 0.001d);
-        BlockPos.PooledMutable pos1 = BlockPos.PooledMutable.retain(bounds.maxX - 0.001d, bounds.maxY - 0.001d, bounds.maxZ - 0.001d);
-        BlockPos.PooledMutable pos2 = BlockPos.PooledMutable.retain();
+        BlockPos.Mutable pos0 = new BlockPos.Mutable(bounds.minX + 0.001d, bounds.minY + 0.001d, bounds.minZ + 0.001d);
+        BlockPos.Mutable pos1 = new BlockPos.Mutable(bounds.maxX - 0.001d, bounds.maxY - 0.001d, bounds.maxZ - 0.001d);
+        BlockPos.Mutable pos2 = new BlockPos.Mutable();
         if (this.world.isAreaLoaded(pos0, pos1)) {
             for (int i = pos0.getX(); i <= pos1.getX(); ++i) {
                 for (int j = pos0.getY(); j <= pos1.getY(); ++j) {
@@ -367,7 +369,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
 
     @Override
     protected boolean canFitPassenger(Entity passenger) {
-        return canFlyInDimension(this.world.dimension.getType()) && super.canFitPassenger(passenger) && passenger instanceof PlayerEntity;
+        return canFlyInDimension(this.world.getDimensionKey()) && super.canFitPassenger(passenger) && passenger instanceof PlayerEntity;
     }
 
     @Override
@@ -411,7 +413,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     @Override
-    protected void dealFireDamage(int amount) {
+    public void setFire(int amount) {
     }
 
     @Override

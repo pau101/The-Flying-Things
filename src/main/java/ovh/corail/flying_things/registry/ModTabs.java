@@ -21,10 +21,12 @@ public class ModTabs {
             return stack;
         }
 
+        /*
         @Override
         @OnlyIn(Dist.CLIENT)
         public String getTranslationKey() {
             return MOD_NAME;
         }
+        */
     });
 }

@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -15,10 +15,10 @@ version = '1.8.9'
 group = 'ovh.corail' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'flying_things'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Need this here so eclipse task generates correctly.
 
 minecraft {
-    mappings channel: 'snapshot', version: '20200514-1.15.1'
+    mappings channel: 'snapshot', version: '20210309-1.16.5'
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -41,7 +41,27 @@ minecraft {
                 }
             }
         }
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', ''
+
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'flying_things', '--all', '--output', '"' +  file('src/generated/resources/') + '"', '--existing', '"' + file('src/main/resources/') + '"'
+
+            mods {
+                flying_things {
+                    source sourceSets.main
+                }
+            }
+        }
     }
+}
+
+sourceSets.main.resources {
+	srcDir 'src/generated/resources'
+	exclude '.cache'
 }
 
 repositories {
@@ -49,9 +69,9 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.2-31.2.0'
-    runtimeOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.0.4")
-    compileOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.0.4:api")
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.1'
+    runtimeOnly fg.deobf("mezz.jei:jei-1.16.5:7.7.1.116")
+    compileOnly fg.deobf("mezz.jei:jei-1.16.5:7.7.1.116:api")
 }
 
 jar {

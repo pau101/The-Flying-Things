@@ -1,0 +1,6 @@
+{
+  "type": "flying_things:colored_broom",
+  "broom": "flying_things:enchanted_broom",
+  "dye": "minecraft:green_dye",
+  "modelType": 13
+}

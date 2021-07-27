@@ -10,11 +10,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.registries.ForgeRegistries;
 import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.entity.EntityAbstractFlyingThing;
@@ -25,7 +26,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
 
     abstract EntityType<?> getEntityType();
 
-    abstract boolean canFlyInDimension(DimensionType dimType);
+    abstract boolean canFlyInDimension(RegistryKey<World> dimType);
 
     abstract void onEntitySpawn(ItemStack stack, EntityAbstractFlyingThing entity);
 
@@ -45,11 +46,11 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
         if (!world.isRemote) {
             MinecraftServer server = player.world.getServer();
             if (server != null && !server.isFlightAllowed()) {
-                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"));
+                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"), Util.DUMMY_UUID);
                 return ActionResult.resultFail(stack);
             }
-            if (!canFlyInDimension(world.dimension.getType())) {
-                player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", stack.getDisplayName()));
+            if (!canFlyInDimension(world.getDimensionKey())) {
+                player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", stack.getDisplayName()), Util.DUMMY_UUID);
                 return ActionResult.resultFail(stack);
             }
             player.getCooldownTracker().setCooldown(this, 100);

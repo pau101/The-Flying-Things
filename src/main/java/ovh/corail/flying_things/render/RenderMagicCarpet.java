@@ -3,15 +3,15 @@ package ovh.corail.flying_things.render;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix3f;
-import net.minecraft.client.renderer.Matrix4f;
-import net.minecraft.client.renderer.Vector3f;
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
+import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix3f;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.flying_things.config.ConfigFlyingThings;
@@ -52,7 +52,7 @@ public final class RenderMagicCarpet extends EntityRenderer<EntityMagicCarpet> {
     }
 
     @Override
-    public boolean shouldRender(EntityMagicCarpet entity, ClippingHelperImpl camera, double camX, double camY, double camZ) {
+    public boolean shouldRender(EntityMagicCarpet entity, ClippingHelper camera, double camX, double camY, double camZ) {
         return entity.world == null || super.shouldRender(entity, camera, camX, camY, camZ);
     }
 

@@ -1,0 +1,12 @@
+{
+    "conditions": [
+        {
+            "condition": "flying_things:is_boss"
+        },
+        {
+            "condition": "minecraft:random_chance",
+            "chance": 0.2
+        }
+    ],
+    "item": "flying_things:phial_of_animation"
+}

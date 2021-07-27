@@ -37,10 +37,10 @@ import static ovh.corail.flying_things.ModFlyingThings.MOD_NAME;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 @SuppressWarnings({ "unused", "FieldCanBeLocal" })
 public class ClientEventHandler {
-    private static final KeyBinding keybindConfig;
-
-    static {
-        ClientRegistry.registerKeyBinding(keybindConfig = new KeyBinding("Configuration Screen", KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID, MOD_NAME));
+    private static KeyBinding keybindConfig;
+    
+    public static void registerKeybind() {
+    	ClientRegistry.registerKeyBinding(keybindConfig = new KeyBinding("Configuration Screen", KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID, MOD_NAME));
     }
 
     private static boolean HAS_TRUE_SIGHT = false, REQUIRE_REMOVAL_NIGHTVISION = false;

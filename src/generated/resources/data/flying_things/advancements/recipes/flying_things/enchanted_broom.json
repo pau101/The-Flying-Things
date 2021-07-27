@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "flying_things:enchanted_broom"
+    ]
+  },
+  "criteria": {
+    "has_phial": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "flying_things:phial_of_animation"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "flying_things:enchanted_broom"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_phial",
+      "has_the_recipe"
+    ]
+  ]
+}

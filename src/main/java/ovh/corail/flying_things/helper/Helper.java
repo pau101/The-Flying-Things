@@ -10,8 +10,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.LogicalSide;
@@ -49,7 +51,7 @@ public class Helper {
     }
 
     public static boolean isBoss(@Nullable Entity entity) {
-        return entity != null && !entity.isNonBoss();
+        return entity != null && !entity.canChangeDimension();
     }
 
     public static boolean isRidingFlyingThing(@Nullable Entity entity) {
@@ -60,8 +62,8 @@ public class Helper {
         return isRidingFlyingThing(entity) && entity.getRidingEntity().getControllingPassenger() == entity;
     }
 
-    public static String getDimensionString(DimensionType dimensionType) {
-        ResourceLocation rl = DimensionType.getKey(dimensionType);
+    public static String getDimensionString(RegistryKey<World> dimensionType) {
+        ResourceLocation rl = dimensionType.getLocation();
         return rl == null ? "" : rl.toString();
     }
 
@@ -77,8 +79,8 @@ public class Helper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static String getNameForKeybindSneak() {
-        return Minecraft.getInstance().gameSettings.keyBindSneak.getLocalizedName();
+    public static ITextComponent getNameForKeybindSneak() {
+        return Minecraft.getInstance().gameSettings.keyBindSneak.func_238171_j_();
     }
 
     @OnlyIn(Dist.CLIENT)

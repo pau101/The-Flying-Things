@@ -2,13 +2,13 @@ package ovh.corail.flying_things.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Vector3f;
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
+import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.flying_things.entity.EntityEnchantedBroom;
@@ -43,7 +43,7 @@ public class RenderEnchantedBroom extends EntityRenderer<EntityEnchantedBroom> {
     }
 
     @Override
-    public boolean shouldRender(EntityEnchantedBroom entity, ClippingHelperImpl camera, double camX, double camY, double camZ) {
+    public boolean shouldRender(EntityEnchantedBroom entity, ClippingHelper camera, double camX, double camY, double camZ) {
         return entity.world == null || super.shouldRender(entity, camera, camX, camY, camZ);
     }
 

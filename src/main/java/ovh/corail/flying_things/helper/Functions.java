@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 @OnlyIn(Dist.CLIENT)
 public class Functions {
-    private static final Function<ResourceLocation, RenderType> FLYING_THINGS_GLINT = rl -> RenderType.makeType("flying_things_glint", DefaultVertexFormats.POSITION_COLOR_TEX_LIGHTMAP, 7, 256, RenderType.State.getBuilder().texture(new RenderState.TextureState(rl, true, false)).writeMask(new RenderState.WriteMaskState(true, false)).depthTest(new RenderState.DepthTestState(514)).transparency(new RenderState.TransparencyState("glint_transparency", () -> {
+    private static final Function<ResourceLocation, RenderType> FLYING_THINGS_GLINT = rl -> RenderType.makeType("flying_things_glint", DefaultVertexFormats.POSITION_COLOR_TEX_LIGHTMAP, 7, 256, RenderType.State.getBuilder().texture(new RenderState.TextureState(rl, true, false)).writeMask(new RenderState.WriteMaskState(true, false)).depthTest(new RenderState.DepthTestState("==", 514)).transparency(new RenderState.TransparencyState("glint_transparency", () -> {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.ONE);
         RenderSystem.enableCull();

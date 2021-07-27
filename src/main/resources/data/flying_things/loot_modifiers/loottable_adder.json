@@ -1,0 +1,39 @@
+{
+  "conditions": [
+    {
+      "condition": "alternative",
+      "terms": [
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/end_city_treasure"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/nether_bridge"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/stronghold_library"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/desert_pyramid"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/jungle_temple"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/igloo_chest"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:chests/woodland_mansion"
+        }
+      ]
+    }
+  ],
+  "item": "flying_things:phial_of_animation",
+  "chance": 10
+}

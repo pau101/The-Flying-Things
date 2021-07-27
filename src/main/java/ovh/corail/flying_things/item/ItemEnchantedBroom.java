@@ -9,10 +9,11 @@ import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.flying_things.config.ConfigFlyingThings;
@@ -51,7 +52,7 @@ public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
     }
 
     @Override
-    public boolean canFlyInDimension(DimensionType dimensionType) {
+    public boolean canFlyInDimension(RegistryKey<World> dimensionType) {
         return !ConfigFlyingThings.deniedDimensionToFly.deniedDimensionBroom.get().contains(Helper.getDimensionString(dimensionType));
     }
 
@@ -65,7 +66,7 @@ public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (!Screen.hasShiftDown()) {
-            list.add(new TranslationTextComponent(MOD_ID + ".message.hold_key", "SHIFT").appendText(" ").appendSibling(new TranslationTextComponent(MOD_ID + ".message.for_more_infos")));
+            list.add(new TranslationTextComponent(MOD_ID + ".message.hold_key", "SHIFT").appendSibling(new StringTextComponent(" ")).appendSibling(new TranslationTextComponent(MOD_ID + ".message.for_more_infos")));
         } else {
             list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc1"));
             list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc2"));

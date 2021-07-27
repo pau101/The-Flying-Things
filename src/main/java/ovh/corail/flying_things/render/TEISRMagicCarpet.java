@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -15,12 +16,12 @@ import ovh.corail.flying_things.registry.ModEntities;
 @OnlyIn(Dist.CLIENT)
 public class TEISRMagicCarpet extends ItemStackTileEntityRenderer {
     private final EntityMagicCarpet entity = ModEntities.magic_carpet.create(null);
-
+    
     @Override
-    public void render(ItemStack stack, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLightIn, int combinedOverlayIn) {
-        assert entity != null;
+    public void func_239207_a_(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
+    	assert entity != null;
         entity.setModelType(ItemMagicCarpet.getModelType(stack));
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        RenderMagicCarpet.render(entity, 0f, player != null ? player.ticksExisted : 0, Minecraft.getInstance().getRenderPartialTicks(), matrixStack, iRenderTypeBuffer, combinedLightIn, true);
+        RenderMagicCarpet.render(entity, 0f, player != null ? player.ticksExisted : 0, Minecraft.getInstance().getRenderPartialTicks(), matrixStack, iRenderTypeBuffer, combinedLight, true);
     }
 }

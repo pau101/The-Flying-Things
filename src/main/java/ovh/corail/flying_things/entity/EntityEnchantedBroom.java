@@ -13,10 +13,10 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.FMLPlayMessages;
 import ovh.corail.flying_things.config.ConfigFlyingThings;
@@ -65,7 +65,7 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
     }
 
     @Override
-    public boolean canFlyInDimension(DimensionType dimensionType) {
+    public boolean canFlyInDimension(RegistryKey<World> dimensionType) {
         if (world.isRemote) {
             return true;
         }
