@@ -1,8 +1,7 @@
 {
   "replace": false,
   "entries": [
-    "flying_things:loottable_adder",
-    "flying_things:mobdrop_phial",
-    "flying_things:mobdrop_pumpkin_stick"
+    "flying_things:phial_of_animation",
+    "flying_things:pumpkin_stick"
   ]
 }

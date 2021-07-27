@@ -1,0 +1,64 @@
+{
+  "conditions": [
+    {
+      "condition": "alternative",
+      "terms": [
+        {
+          "condition": "flying_things:and",
+          "terms": [
+            {
+              "condition": "alternative",
+              "terms": [
+                {
+                  "condition": "forge:loot_table_id",
+                  "loot_table_id": "minecraft:chests/end_city_treasure"
+                },
+                {
+                  "condition": "forge:loot_table_id",
+                  "loot_table_id": "minecraft:chests/nether_bridge"
+                },
+                {
+                  "condition": "forge:loot_table_id",
+                  "loot_table_id": "minecraft:chests/stronghold_library"
+                },
+                {
+                  "condition": "forge:loot_table_id",
+                  "loot_table_id": "minecraft:chests/desert_pyramid"
+                },
+                {
+                  "condition": "forge:loot_table_id",
+                  "loot_table_id": "minecraft:chests/jungle_temple"
+                },
+                {
+                  "condition": "forge:loot_table_id",
+                  "loot_table_id": "minecraft:chests/igloo_chest"
+                },
+                {
+                  "condition": "forge:loot_table_id",
+                  "loot_table_id": "minecraft:chests/woodland_mansion"
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.05
+            }
+          ]
+        },
+        {
+          "condition": "flying_things:and",
+          "terms": [
+            {
+              "condition": "flying_things:is_boss"
+            },
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "item": "flying_things:phial_of_animation"
+}
