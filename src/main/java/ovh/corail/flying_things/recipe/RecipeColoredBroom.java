@@ -5,11 +5,9 @@ import java.util.stream.Stream;
 
 import com.google.gson.JsonObject;
 
-import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipe;
@@ -17,7 +15,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import ovh.corail.flying_things.ModFlyingThings;
@@ -45,56 +42,6 @@ public class RecipeColoredBroom extends ShapelessRecipe {
 		this.modelType = modelType;
 		this.dye = dye;
 	}
-    
-    /*
-    @Override
-	public boolean matches(CraftingInventory inv, World worldIn) {
-    	boolean hasBroom = false, hasDye = false;
-        int count = 0;
-        for (int i = 0; i < inv.getSizeInventory(); i++) {
-            if (inv.getStackInSlot(i).isEmpty()) {
-                continue;
-            }
-            if (inv.getStackInSlot(i).getItem() == this.broom) {
-                hasBroom = true;
-                count++;
-                continue;
-            } else if (inv.getStackInSlot(i).getItem() == this.dye) {
-                hasDye = true;
-                count++;
-                continue;
-            }
-            if (count > 2) {
-                return false;
-            }
-        }
-        return count == 2 && hasBroom && hasDye;
-	}
-	*/
-
-    /*
-	@Override
-	public ItemStack getCraftingResult(CraftingInventory inv) {
-		ItemStack broom = ItemStack.EMPTY;
-        ItemStack dye = ItemStack.EMPTY;
-        for (int i = 0; i < inv.getSizeInventory(); i++) {
-            ItemStack stack = inv.getStackInSlot(i);
-            if (stack.isEmpty()) {
-                continue;
-            }
-            if (stack.getItem() == this.broom) {
-                broom = stack.copy();
-            }
-            if (stack.getItem() == this.dye) {
-                dye = stack;
-            }
-        }
-        if (broom.isEmpty() || dye.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
-        return ItemEnchantedBroom.setModelType(broom, this.modelType);
-	}
-	*/
 
 	@Override
 	public boolean canFit(int width, int height) {
