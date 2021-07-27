@@ -15,11 +15,13 @@ import ovh.corail.flying_things.registry.ModEntities;
 
 @OnlyIn(Dist.CLIENT)
 public class TEISRMagicCarpet extends ItemStackTileEntityRenderer {
-    private final EntityMagicCarpet entity = ModEntities.magic_carpet.create(null);
+    private EntityMagicCarpet entity;
     
     @Override
     public void func_239207_a_(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
-    	assert entity != null;
+    	if(entity == null) {
+    		entity = ModEntities.magic_carpet.get().create(null);
+    	}
         entity.setModelType(ItemMagicCarpet.getModelType(stack));
         ClientPlayerEntity player = Minecraft.getInstance().player;
         RenderMagicCarpet.render(entity, 0f, player != null ? player.ticksExisted : 0, Minecraft.getInstance().getRenderPartialTicks(), matrixStack, iRenderTypeBuffer, combinedLight, true);

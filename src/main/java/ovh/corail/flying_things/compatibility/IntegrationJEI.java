@@ -75,7 +75,7 @@ public class IntegrationJEI implements IModPlugin {
 
         if (Helper.isDateAroundHalloween() || ConfigFlyingThings.general.persistantHolidays.get()) {
             for (DyeColor dye : DyeColor.values()) {
-                ItemStack currentStack = ItemEnchantedBroom.setModelType(new ItemStack(ModItems.enchantedBroom), dye.getId());
+                ItemStack currentStack = ItemEnchantedBroom.setModelType(new ItemStack(ModItems.enchantedBroom.get()), dye.getId());
                 builder.add(new ShapelessRecipe(new ResourceLocation(ModFlyingThings.MOD_ID + ":pumpkin_broom"), "pumpkin_broom",
                         ItemEnchantedBroom.setHeadType(currentStack.copy(), 1), NonNullList.from(Ingredient.EMPTY,
                         Ingredient.fromStacks(new ItemStack(Blocks.PUMPKIN)),
@@ -88,7 +88,7 @@ public class IntegrationJEI implements IModPlugin {
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
-    	registration.registerSubtypeInterpreter(ModItems.enchantedBroom, (stack, context) -> String.valueOf(ItemAbstractFlyingThing.getModelType(stack)) + ItemEnchantedBroom.getHeadType(stack));
-        registration.registerSubtypeInterpreter(ModItems.magicCarpet, (stack, context) -> String.valueOf(ItemAbstractFlyingThing.getModelType(stack)));
+    	registration.registerSubtypeInterpreter(ModItems.enchantedBroom.get(), (stack, context) -> String.valueOf(ItemAbstractFlyingThing.getModelType(stack)) + ItemEnchantedBroom.getHeadType(stack));
+        registration.registerSubtypeInterpreter(ModItems.magicCarpet.get(), (stack, context) -> String.valueOf(ItemAbstractFlyingThing.getModelType(stack)));
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
+import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.helper.Helper;
 
 public class MobdropPumpkinStick extends LootModifier {
@@ -26,7 +27,10 @@ public class MobdropPumpkinStick extends LootModifier {
 	@Override
 	protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context) {
 		if(Helper.isDateAroundHalloween()) {
-			generatedLoot.add(new ItemStack(item));	
+			int val = context.getRandom().nextInt(1000);
+			if(val < ConfigFlyingThings.general.chanceDropPumpkinStick.get()) {
+				generatedLoot.add(new ItemStack(item));		
+			}
 		}
 		return generatedLoot;
 	}

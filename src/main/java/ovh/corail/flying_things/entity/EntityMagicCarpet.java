@@ -36,16 +36,16 @@ public class EntityMagicCarpet extends EntityAbstractFlyingThing {
     }
 
     public EntityMagicCarpet(World world, double x, double y, double z) {
-        super(ModEntities.magic_carpet, world, x, y, z);
+        super(ModEntities.magic_carpet.get(), world, x, y, z);
     }
 
     public EntityMagicCarpet(FMLPlayMessages.SpawnEntity spawnEntity, World world) {
-        this(ModEntities.magic_carpet, world);
+        this(ModEntities.magic_carpet.get(), world);
     }
 
     @Override
     public ItemStack getStack() {
-        ItemStack stack = new ItemStack(ModItems.magicCarpet);
+        ItemStack stack = new ItemStack(ModItems.magicCarpet.get());
         ItemAbstractFlyingThing.setModelType(stack, getModelType());
         if (hasCustomName()) {
             stack.setDisplayName(getCustomName());
@@ -67,7 +67,7 @@ public class EntityMagicCarpet extends EntityAbstractFlyingThing {
 
     @Override
     protected boolean onInteractWithPlayerItem(ItemStack stack, PlayerEntity player, Hand hand) {
-        if (stack.getItem() == ModItems.pumpkinStick) {
+        if (stack.getItem() == ModItems.pumpkinStick.get()) {
             int res = Helper.getRandom(9, 13);
             if (res == getModelType()) {
                 res = (res == 13 ? 9 : res + 1);

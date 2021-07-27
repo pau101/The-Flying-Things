@@ -27,10 +27,6 @@ public class ConfigFlyingThings {
         public final ConfigValue<Boolean> allowSpecialRegen;
         public final ConfigValue<Integer> chanceToFallWithProjectile;
         public final ConfigValue<Boolean> persistantHolidays;
-        @Deprecated
-        public final ConfigValue<Integer> chanceDropPhialOfAnimationInChest;
-        @Deprecated
-        public final ConfigValue<Integer> chanceDropPhialOfAnimationOnBoss;
         public final ConfigValue<Integer> chanceDropPumpkinStick;
 
         public General(ForgeConfigSpec.Builder builder) {
@@ -68,14 +64,6 @@ public class ConfigFlyingThings {
                     .comment("Chance to get Halloween Sticks during this event [0..1000|default:10]")
                     .translation(getTranslation("chance_drop_pumpkin_stick"))
                     .defineInRange("chance_drop_pumpkin_stick", 10, 0, 1000);
-            chanceDropPhialOfAnimationInChest = builder
-                    .comment("Chance to get a Phial of Animation in chest [0..1000|default:50]")
-                    .translation(getTranslation("chance_drop_phial_of_animation_in_chest"))
-                    .defineInRange("chance_drop_phial_of_animation_in_chest", 50, 0, 1000);
-            chanceDropPhialOfAnimationOnBoss = builder
-                    .comment("Chance to get a Phial of Animation on boss [0..1000|default:200]")
-                    .translation(getTranslation("chance_drop_phial_of_animation_on_boss"))
-                    .defineInRange("chance_drop_phial_of_animation_on_boss", 200, 0, 1000);
 
             builder.pop();
         }

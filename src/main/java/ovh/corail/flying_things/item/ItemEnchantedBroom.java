@@ -37,7 +37,7 @@ public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
 
     @Override
     EntityType<?> getEntityType() {
-        return ModEntities.enchanted_broom;
+        return ModEntities.enchanted_broom.get();
     }
 
     @Override

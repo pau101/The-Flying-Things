@@ -21,6 +21,7 @@ import ovh.corail.flying_things.proxy.ClientProxy;
 import ovh.corail.flying_things.proxy.IProxy;
 import ovh.corail.flying_things.proxy.ServerProxy;
 import ovh.corail.flying_things.registry.ModEntities;
+import ovh.corail.flying_things.registry.ModItems;
 import ovh.corail.flying_things.registry.ModSerializers;
 import ovh.corail.flying_things.render.RenderEnchantedBroom;
 import ovh.corail.flying_things.render.RenderMagicCarpet;
@@ -44,6 +45,9 @@ public class ModFlyingThings {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
         context.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> GuiConfig::new);
+        
+        ModItems.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ModEntities.ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
     private void registerSharedConfig(ModLoadingContext context) {
@@ -51,8 +55,8 @@ public class ModFlyingThings {
     }
 
     private void onClientSetup(final FMLClientSetupEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(ModEntities.enchanted_broom, RenderEnchantedBroom::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntities.magic_carpet, RenderMagicCarpet::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntities.enchanted_broom.get(), RenderEnchantedBroom::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntities.magic_carpet.get(), RenderMagicCarpet::new);
         ClientEventHandler.registerKeybind();
     }
     

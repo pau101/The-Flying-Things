@@ -3,6 +3,8 @@ package ovh.corail.flying_things.registry;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import ovh.corail.flying_things.helper.Helper;
@@ -16,17 +18,15 @@ public class ModTabs {
         @Override
         @OnlyIn(Dist.CLIENT)
         public ItemStack createIcon() {
-            ItemStack stack = new ItemStack(ModItems.enchantedBroom);
+            ItemStack stack = new ItemStack(ModItems.enchantedBroom.get());
             ItemEnchantedBroom.setModelType(stack, Helper.getRandom(0, DyeColor.values().length - 1));
             return stack;
         }
-
-        /*
-        @Override
+        
         @OnlyIn(Dist.CLIENT)
-        public String getTranslationKey() {
-            return MOD_NAME;
-        }
-        */
+        @Override
+        public ITextComponent getGroupName() {
+        	return new StringTextComponent(MOD_NAME);
+        };
     });
 }

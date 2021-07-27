@@ -27,7 +27,7 @@ public class RecipeGenerator extends RecipeProvider {
 	
 	@Override
 	protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
-		ShapedRecipeBuilder.shapedRecipe(ModItems.enchantedBroom)
+		ShapedRecipeBuilder.shapedRecipe(ModItems.enchantedBroom.get())
 			.patternLine("012")
 			.patternLine("041")
 			.patternLine("300")
@@ -35,15 +35,15 @@ public class RecipeGenerator extends RecipeProvider {
 			.key('1', Items.STRING)
 			.key('2', Items.WHEAT)
 			.key('3', ItemTags.LOGS)
-			.key('4', ModItems.phialOfAnimation)
-			.addCriterion("has_phial", hasItem(ModItems.phialOfAnimation))
+			.key('4', ModItems.phialOfAnimation.get())
+			.addCriterion("has_phial", hasItem(ModItems.phialOfAnimation.get()))
 			.build(getNBTConsumer(consumer, "{model_type:12}"));
 		
 		Arrays.stream(DyeColor.values())
 			.map(dye -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(dye.getTranslationKey() + "_dye")))
 			.forEach(dye -> {
 				String color = ((DyeItem)dye).getDyeColor().getTranslationKey();
-				ColoredBroomRecipe.recipe(ModItems.enchantedBroom)
+				ColoredBroomRecipe.recipe(ModItems.enchantedBroom.get())
 					.dye(dye)
 					.addCriterion("has_" + color, hasItem(dye))
 					.build(consumer, new ResourceLocation(ModFlyingThings.MOD_ID, "broom_" + color));

@@ -24,7 +24,7 @@ public class RecipeRaidCarpet extends ShapedRecipe {
                 BROWN_CARPET, gemIngredient, BROWN_CARPET,
                 BROWN_CARPET, SHIELD, BROWN_CARPET,
                 BROWN_CARPET, gemIngredient, BROWN_CARPET
-        ), ItemMagicCarpet.setModelType(new ItemStack(ModItems.magicCarpet), modelType));
+        ), ItemMagicCarpet.setModelType(new ItemStack(ModItems.magicCarpet.get()), modelType));
     }
 
     @Override

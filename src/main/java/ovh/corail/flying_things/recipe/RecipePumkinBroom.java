@@ -17,12 +17,12 @@ public class RecipePumkinBroom extends ShapelessRecipe {
     private static final NonNullList<Ingredient> INGREDIENTS = NonNullList.create();
 
     static {
-        INGREDIENTS.add(Ingredient.fromStacks(ItemEnchantedBroom.setModelType(new ItemStack(ModItems.enchantedBroom), 12)));
+        INGREDIENTS.add(Ingredient.fromStacks(ItemEnchantedBroom.setModelType(new ItemStack(ModItems.enchantedBroom.get()), 12)));
         INGREDIENTS.add(Ingredient.fromStacks(new ItemStack(Blocks.PUMPKIN)));
     }
 
     public RecipePumkinBroom(ResourceLocation rl) {
-        super(rl, "", ItemEnchantedBroom.setHeadType(new ItemStack(ModItems.enchantedBroom), 1), INGREDIENTS);
+        super(rl, "", ItemEnchantedBroom.setHeadType(new ItemStack(ModItems.enchantedBroom.get()), 1), INGREDIENTS);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class RecipePumkinBroom extends ShapelessRecipe {
             if (inv.getStackInSlot(i).isEmpty()) {
                 continue;
             }
-            if (inv.getStackInSlot(i).getItem() == ModItems.enchantedBroom) {
+            if (inv.getStackInSlot(i).getItem() == ModItems.enchantedBroom.get()) {
                 hasBroom = true;
                 count++;
             } else if (INGREDIENTS.get(1).test(inv.getStackInSlot(i))) {
@@ -64,7 +64,7 @@ public class RecipePumkinBroom extends ShapelessRecipe {
             if (stack.isEmpty()) {
                 continue;
             }
-            if (stack.getItem() == ModItems.enchantedBroom) {
+            if (stack.getItem() == ModItems.enchantedBroom.get()) {
                 broom = stack.copy();
             }
             if (INGREDIENTS.get(1).test(stack)) {

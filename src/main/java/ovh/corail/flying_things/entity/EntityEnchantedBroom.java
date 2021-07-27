@@ -40,16 +40,16 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
     }
 
     public EntityEnchantedBroom(World world, double x, double y, double z) {
-        super(ModEntities.enchanted_broom, world, x, y, z);
+        super(ModEntities.enchanted_broom.get(), world, x, y, z);
     }
 
     public EntityEnchantedBroom(FMLPlayMessages.SpawnEntity spawnEntity, World world) {
-        this(ModEntities.enchanted_broom, world);
+        this(ModEntities.enchanted_broom.get(), world);
     }
 
     @Override
     public ItemStack getStack() {
-        ItemStack stack = new ItemStack(ModItems.enchantedBroom);
+        ItemStack stack = new ItemStack(ModItems.enchantedBroom.get());
         ItemAbstractFlyingThing.setModelType(stack, getModelType());
         if (hasCustomName()) {
             stack.setDisplayName(getCustomName());

@@ -38,7 +38,7 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
 
     @Override
     EntityType<?> getEntityType() {
-        return ModEntities.magic_carpet;
+        return ModEntities.magic_carpet.get();
     }
 
     @Override

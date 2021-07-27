@@ -47,7 +47,7 @@ public class Helper {
     }
 
     public static boolean isFlyingthing(@Nullable Entity entity) {
-        return entity != null && (entity.getType() == ModEntities.enchanted_broom || entity.getType() == ModEntities.magic_carpet);
+        return entity != null && (entity.getType() == ModEntities.enchanted_broom.get() || entity.getType() == ModEntities.magic_carpet.get());
     }
 
     public static boolean isBoss(@Nullable Entity entity) {

@@ -15,11 +15,14 @@ import ovh.corail.flying_things.registry.ModEntities;
 
 @OnlyIn(Dist.CLIENT)
 public class TEISREnchantedBroom extends ItemStackTileEntityRenderer {
-    private final EntityEnchantedBroom entity = ModEntities.enchanted_broom.create(null);
+    private EntityEnchantedBroom entity;
     
     @Override
     public void func_239207_a_(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
-    	assert entity != null;
+    	if(entity == null) {
+    		entity = ModEntities.enchanted_broom.get().create(null);
+    	}
+    	
         entity.setModelType(ItemEnchantedBroom.getModelType(stack));
         entity.setHeadType(ItemEnchantedBroom.getHeadType(stack));
         ClientPlayerEntity player = Minecraft.getInstance().player;
