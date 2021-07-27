@@ -18,12 +18,12 @@ public class TEISRMagicCarpet extends ItemStackTileEntityRenderer {
     private EntityMagicCarpet entity;
     
     @Override
-    public void func_239207_a_(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void renderByItem(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
     	if(entity == null) {
     		entity = ModEntities.magic_carpet.get().create(null);
     	}
         entity.setModelType(ItemMagicCarpet.getModelType(stack));
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        RenderMagicCarpet.render(entity, 0f, player != null ? player.ticksExisted : 0, Minecraft.getInstance().getRenderPartialTicks(), matrixStack, iRenderTypeBuffer, combinedLight, true);
+        RenderMagicCarpet.render(entity, 0f, player != null ? player.tickCount : 0, Minecraft.getInstance().getFrameTime(), matrixStack, iRenderTypeBuffer, combinedLight, true);
     }
 }

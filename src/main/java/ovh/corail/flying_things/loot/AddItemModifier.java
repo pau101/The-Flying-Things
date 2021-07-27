@@ -32,7 +32,7 @@ public class AddItemModifier extends LootModifier {
 
 		@Override
 		public AddItemModifier read(ResourceLocation location, JsonObject object, ILootCondition[] ilootcondition) {
-			Item item = JSONUtils.getItem(object, "item");
+			Item item = JSONUtils.getAsItem(object, "item");
 			return new AddItemModifier(ilootcondition, item);
 		}
 

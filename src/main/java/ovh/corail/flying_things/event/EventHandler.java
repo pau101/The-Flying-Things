@@ -43,12 +43,12 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onLivingDeath(LivingDeathEvent event) {
         if (Helper.isControllingFlyingThing(event.getEntityLiving())) {
-            EntityAbstractFlyingThing flying_thing = (EntityAbstractFlyingThing) event.getEntityLiving().getRidingEntity();
+            EntityAbstractFlyingThing flying_thing = (EntityAbstractFlyingThing) event.getEntityLiving().getVehicle();
             if (flying_thing != null) {
                 if (Helper.isValidPlayer(event.getEntityLiving()) && flying_thing.hasSoulbound()) {
                     ItemHandlerHelper.giveItemToPlayer((PlayerEntity) event.getEntityLiving(), flying_thing.getStack());
                 } else {
-                    event.getEntityLiving().entityDropItem(flying_thing.getStack(), 0f);
+                    event.getEntityLiving().spawnAtLocation(flying_thing.getStack(), 0f);
                 }
                 flying_thing.remove();
             }

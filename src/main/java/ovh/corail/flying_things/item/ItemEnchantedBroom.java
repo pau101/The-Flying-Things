@@ -32,7 +32,7 @@ import static ovh.corail.flying_things.ModFlyingThings.MOD_ID;
 public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
 
     public ItemEnchantedBroom() {
-        super("enchanted_broom", getBuilder(true).maxStackSize(1).setISTER(() -> TEISREnchantedBroom::new));
+        super("enchanted_broom", getBuilder(true).stacksTo(1).setISTER(() -> TEISREnchantedBroom::new));
     }
 
     @Override
@@ -41,8 +41,8 @@ public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-        if (isInGroup(group)) {
+    public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
+        if (allowdedIn(group)) {
             for (int i = 0; i < DyeColor.values().length; i++) {
                 ItemStack stack = new ItemStack(this);
                 setModelType(stack, DyeColor.values()[i].getId());
@@ -58,15 +58,15 @@ public class ItemEnchantedBroom extends ItemAbstractFlyingThing {
 
     @Override
     public int getActualRegen(ItemStack stack, World world, Entity entity, int slot, boolean isSelected) {
-        boolean hasSpecialRegen = ConfigFlyingThings.general.allowSpecialRegen.get() && world.isBlockLoaded(entity.getPosition().down()) && world.getBlockState(entity.getPosition().down()).getBlock() == Blocks.RED_MUSHROOM_BLOCK;
+        boolean hasSpecialRegen = ConfigFlyingThings.general.allowSpecialRegen.get() && world.hasChunkAt(entity.blockPosition().below()) && world.getBlockState(entity.blockPosition().below()).getBlock() == Blocks.RED_MUSHROOM_BLOCK;
         return hasSpecialRegen ? 20 : 1;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (!Screen.hasShiftDown()) {
-            list.add(new TranslationTextComponent(MOD_ID + ".message.hold_key", "SHIFT").appendSibling(new StringTextComponent(" ")).appendSibling(new TranslationTextComponent(MOD_ID + ".message.for_more_infos")));
+            list.add(new TranslationTextComponent(MOD_ID + ".message.hold_key", "SHIFT").append(new StringTextComponent(" ")).append(new TranslationTextComponent(MOD_ID + ".message.for_more_infos")));
         } else {
             list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc1"));
             list.add(new TranslationTextComponent(MOD_ID + ".item.enchanted_broom.desc2"));

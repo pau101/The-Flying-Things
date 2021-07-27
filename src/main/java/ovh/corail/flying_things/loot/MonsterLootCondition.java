@@ -15,11 +15,11 @@ public class MonsterLootCondition implements ILootCondition {
 
 	@Override
 	public boolean test(LootContext t) {
-		return t.get(LootContext.EntityTarget.THIS.getParameter()) instanceof MonsterEntity;
+		return t.getParamOrNull(LootContext.EntityTarget.THIS.getParam()) instanceof MonsterEntity;
 	}
 
 	@Override
-	public LootConditionType getConditionType() {
+	public LootConditionType getType() {
 		return ModSerializers.IS_MONSTER;
 	}
 	

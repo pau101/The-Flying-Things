@@ -26,26 +26,26 @@ public class RecipeGenerator extends RecipeProvider {
 	}
 	
 	@Override
-	protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
-		ShapedRecipeBuilder.shapedRecipe(ModItems.enchantedBroom.get())
-			.patternLine("012")
-			.patternLine("041")
-			.patternLine("300")
-			.key('0', Items.LAPIS_LAZULI)
-			.key('1', Items.STRING)
-			.key('2', Items.WHEAT)
-			.key('3', ItemTags.LOGS)
-			.key('4', ModItems.phialOfAnimation.get())
-			.addCriterion("has_phial", hasItem(ModItems.phialOfAnimation.get()))
-			.build(getNBTConsumer(consumer, "{model_type:12}"));
+	protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(ModItems.enchantedBroom.get())
+			.pattern("012")
+			.pattern("041")
+			.pattern("300")
+			.define('0', Items.LAPIS_LAZULI)
+			.define('1', Items.STRING)
+			.define('2', Items.WHEAT)
+			.define('3', ItemTags.LOGS)
+			.define('4', ModItems.phialOfAnimation.get())
+			.unlockedBy("has_phial", has(ModItems.phialOfAnimation.get()))
+			.save(getNBTConsumer(consumer, "{model_type:12}"));
 		
 		Arrays.stream(DyeColor.values())
-			.map(dye -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(dye.getTranslationKey() + "_dye")))
+			.map(dye -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(dye.getName() + "_dye")))
 			.forEach(dye -> {
-				String color = ((DyeItem)dye).getDyeColor().getTranslationKey();
+				String color = ((DyeItem)dye).getDyeColor().getName();
 				ColoredBroomRecipe.recipe(ModItems.enchantedBroom.get())
 					.dye(dye)
-					.addCriterion("has_" + color, hasItem(dye))
+					.addCriterion("has_" + color, has(dye))
 					.build(consumer, new ResourceLocation(ModFlyingThings.MOD_ID, "broom_" + color));
 			});
 	}
@@ -65,29 +65,29 @@ public class RecipeGenerator extends RecipeProvider {
 		}
 
 		@Override
-		public void serialize(JsonObject json) {
-			delegate.serialize(json);
+		public void serializeRecipeData(JsonObject json) {
+			delegate.serializeRecipeData(json);
 			json.getAsJsonObject("result").addProperty("nbt", nbtValue);
 		}
 
 		@Override
-		public ResourceLocation getID() {
-			return delegate.getID();
+		public ResourceLocation getId() {
+			return delegate.getId();
 		}
 
 		@Override
-		public IRecipeSerializer<?> getSerializer() {
-			return delegate.getSerializer();
+		public IRecipeSerializer<?> getType() {
+			return delegate.getType();
 		}
 
 		@Override
-		public JsonObject getAdvancementJson() {
-			return delegate.getAdvancementJson();
+		public JsonObject serializeAdvancement() {
+			return delegate.serializeAdvancement();
 		}
 
 		@Override
-		public ResourceLocation getAdvancementID() {
-			return delegate.getAdvancementID();
+		public ResourceLocation getAdvancementId() {
+			return delegate.getAdvancementId();
 		}
 		
 	}

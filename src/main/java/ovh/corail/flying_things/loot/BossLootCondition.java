@@ -15,11 +15,11 @@ public class BossLootCondition implements ILootCondition {
 
 	@Override
 	public boolean test(LootContext t) {
-		return Helper.isBoss(t.get(LootContext.EntityTarget.THIS.getParameter()));
+		return Helper.isBoss(t.getParamOrNull(LootContext.EntityTarget.THIS.getParam()));
 	}
 
 	@Override
-	public LootConditionType getConditionType() {
+	public LootConditionType getType() {
 		return ModSerializers.IS_BOSS;
 	}
 	

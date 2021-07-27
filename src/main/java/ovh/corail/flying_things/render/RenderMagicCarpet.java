@@ -33,17 +33,17 @@ public final class RenderMagicCarpet extends EntityRenderer<EntityMagicCarpet> {
 
     public RenderMagicCarpet(EntityRendererManager manager) {
         super(manager);
-        this.shadowSize = this.shadowOpaque = 0.2f;
+        this.shadowRadius = this.shadowStrength = 0.2f;
     }
 
     @Override
     public void render(EntityMagicCarpet entity, float entityYaw, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int packedLight) {
-        render(entity, entityYaw, entity.ticksExisted, partialTicks, matrixStack, iRenderTypeBuffer, packedLight, false);
+        render(entity, entityYaw, entity.tickCount, partialTicks, matrixStack, iRenderTypeBuffer, packedLight, false);
         super.render(entity, entityYaw, partialTicks, matrixStack, iRenderTypeBuffer, packedLight);
     }
 
     @Override
-    public ResourceLocation getEntityTexture(EntityMagicCarpet entity) {
+    public ResourceLocation getTextureLocation(EntityMagicCarpet entity) {
         return getTexture(entity);
     }
 
@@ -53,13 +53,13 @@ public final class RenderMagicCarpet extends EntityRenderer<EntityMagicCarpet> {
 
     @Override
     public boolean shouldRender(EntityMagicCarpet entity, ClippingHelper camera, double camX, double camY, double camZ) {
-        return entity.world == null || super.shouldRender(entity, camera, camX, camY, camZ);
+        return entity.level == null || super.shouldRender(entity, camera, camX, camY, camZ);
     }
 
     public static void render(EntityMagicCarpet entity, float entityYaw, int ticksExisted, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int packedLight, boolean isTEISR) {
-        matrixStack.push();
+        matrixStack.pushPose();
         matrixStack.translate(0f, -0.7f, 0f);
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(180f - entityYaw));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(180f - entityYaw));
 
         if (!isTEISR) {
             float f = (float) entity.getTimeSinceHit() - partialTicks;
@@ -68,7 +68,7 @@ public final class RenderMagicCarpet extends EntityRenderer<EntityMagicCarpet> {
                 f1 = 0f;
             }
             if (f > 0f) {
-                matrixStack.rotate(Vector3f.XP.rotationDegrees(MathHelper.sin(f) * f * f1 / 10f * (float) entity.getForwardDirection()));
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(MathHelper.sin(f) * f * f1 / 10f * (float) entity.getForwardDirection()));
             }
         }
 
@@ -84,13 +84,13 @@ public final class RenderMagicCarpet extends EntityRenderer<EntityMagicCarpet> {
             drawCarpet(matrixStack, VERTEX_BUILDER_GLINT.apply(iRenderTypeBuffer), packedLight);
         }
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
     private static void drawCarpet(MatrixStack matrixStack, IVertexBuilder buf, int packedLight) {
-        MatrixStack.Entry last = matrixStack.getLast();
-        Matrix4f matrix4f = last.getMatrix();
-        Matrix3f matrixNormal = last.getNormal();
+        MatrixStack.Entry last = matrixStack.last();
+        Matrix4f matrix4f = last.pose();
+        Matrix3f matrixNormal = last.normal();
 
         for (int i = 0; i < FACE_COUNT; i++) {
             float t0 = (float) i / FACE_COUNT;
@@ -100,17 +100,17 @@ public final class RenderMagicCarpet extends EntityRenderer<EntityMagicCarpet> {
             // up top
             float v00 = TOP_MIN_V + (TOP_MAX_V - TOP_MIN_V) * t0;
             float v01 = TOP_MIN_V + (TOP_MAX_V - TOP_MIN_V) * t1;
-            buf.pos(matrix4f, X0, y0, z0).color(1f, 1f, 1f, 1f).tex(TOP_MIN_U, v00).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
-            buf.pos(matrix4f, X0, y1, z1).color(1f, 1f, 1f, 1f).tex(TOP_MIN_U, v01).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
-            buf.pos(matrix4f, X1, y1, z1).color(1f, 1f, 1f, 1f).tex(TOP_MAX_U, v01).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
-            buf.pos(matrix4f, X1, y0, z0).color(1f, 1f, 1f, 1f).tex(TOP_MAX_U, v00).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
+            buf.vertex(matrix4f, X0, y0, z0).color(1f, 1f, 1f, 1f).uv(TOP_MIN_U, v00).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
+            buf.vertex(matrix4f, X0, y1, z1).color(1f, 1f, 1f, 1f).uv(TOP_MIN_U, v01).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
+            buf.vertex(matrix4f, X1, y1, z1).color(1f, 1f, 1f, 1f).uv(TOP_MAX_U, v01).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
+            buf.vertex(matrix4f, X1, y0, z0).color(1f, 1f, 1f, 1f).uv(TOP_MAX_U, v00).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, 1f, 0f).endVertex();
             // up bottom
             float v10 = BOTTOM_MIN_V + (BOTTOM_MAX_V - BOTTOM_MIN_V) * t0;
             float v11 = BOTTOM_MIN_V + (BOTTOM_MAX_V - BOTTOM_MIN_V) * t1;
-            buf.pos(matrix4f, X0, y1, z1).color(1f, 1f, 1f, 1f).tex(BOTTOM_MIN_U, v11).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
-            buf.pos(matrix4f, X0, y0, z0).color(1f, 1f, 1f, 1f).tex(BOTTOM_MIN_U, v10).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
-            buf.pos(matrix4f, X1, y0, z0).color(1f, 1f, 1f, 1f).tex(BOTTOM_MAX_U, v10).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
-            buf.pos(matrix4f, X1, y1, z1).color(1f, 1f, 1f, 1f).tex(BOTTOM_MAX_U, v11).overlay(OverlayTexture.NO_OVERLAY).lightmap(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
+            buf.vertex(matrix4f, X0, y1, z1).color(1f, 1f, 1f, 1f).uv(BOTTOM_MIN_U, v11).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
+            buf.vertex(matrix4f, X0, y0, z0).color(1f, 1f, 1f, 1f).uv(BOTTOM_MIN_U, v10).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
+            buf.vertex(matrix4f, X1, y0, z0).color(1f, 1f, 1f, 1f).uv(BOTTOM_MAX_U, v10).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
+            buf.vertex(matrix4f, X1, y1, z1).color(1f, 1f, 1f, 1f).uv(BOTTOM_MAX_U, v11).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(matrixNormal, 0f, -1f, 0f).endVertex();
         }
     }
 }

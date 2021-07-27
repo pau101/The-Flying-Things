@@ -29,8 +29,8 @@ public class RecipeColoredBroom extends ShapelessRecipe {
     	Stream<ItemStack> inputBrooms = Arrays.stream(DyeColor.values())
     			.filter(d -> d.getId() != filterModelType)
     			.map(d -> ItemEnchantedBroom.setModelType(new ItemStack(broom), d.getId()));
-    	Ingredient brooms = Ingredient.fromStacks(inputBrooms);
-    	Ingredient dyeIng = Ingredient.fromItems(dye);
+    	Ingredient brooms = Ingredient.of(inputBrooms);
+    	Ingredient dyeIng = Ingredient.of(dye);
     	NonNullList<Ingredient> out = NonNullList.create();
     	out.add(brooms);
     	out.add(dyeIng);
@@ -44,7 +44,7 @@ public class RecipeColoredBroom extends ShapelessRecipe {
 	}
 
 	@Override
-	public boolean canFit(int width, int height) {
+	public boolean canCraftInDimensions(int width, int height) {
 		return width * height >= 2;
 	}
 
@@ -60,15 +60,15 @@ public class RecipeColoredBroom extends ShapelessRecipe {
 	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<RecipeColoredBroom> {
 
 		@Override
-		public RecipeColoredBroom read(ResourceLocation recipeId, JsonObject json) {
-			Item broom = JSONUtils.getItem(json, "broom");
-			Item dye = JSONUtils.getItem(json, "dye");
-			int modelType = JSONUtils.getInt(json, "modelType");
+		public RecipeColoredBroom fromJson(ResourceLocation recipeId, JsonObject json) {
+			Item broom = JSONUtils.getAsItem(json, "broom");
+			Item dye = JSONUtils.getAsItem(json, "dye");
+			int modelType = JSONUtils.getAsInt(json, "modelType");
 			return new RecipeColoredBroom(recipeId, broom, dye, modelType);
 		}
 
 		@Override
-		public RecipeColoredBroom read(ResourceLocation recipeId, PacketBuffer buffer) {
+		public RecipeColoredBroom fromNetwork(ResourceLocation recipeId, PacketBuffer buffer) {
 			ResourceLocation broomRL = buffer.readResourceLocation();
 			ResourceLocation dyeRL = buffer.readResourceLocation();
 			int modelType = buffer.readVarInt();
@@ -80,8 +80,8 @@ public class RecipeColoredBroom extends ShapelessRecipe {
 		}
 
 		@Override
-		public void write(PacketBuffer buffer, RecipeColoredBroom recipe) {
-			buffer.writeResourceLocation(recipe.getRecipeOutput().getItem().getRegistryName());
+		public void toNetwork(PacketBuffer buffer, RecipeColoredBroom recipe) {
+			buffer.writeResourceLocation(recipe.getResultItem().getItem().getRegistryName());
 			buffer.writeResourceLocation(recipe.dye.getRegistryName());
 			buffer.writeVarInt(recipe.modelType);
 		}

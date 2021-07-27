@@ -65,7 +65,7 @@ public class IntegrationJEI implements IModPlugin {
     @Override
     public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
     	registration.getCraftingCategory().addCategoryExtension(RecipeColoredBroom.class, recipe -> {
-    		return new ColoredBroomExtension(recipe.getId(), recipe.getRecipeOutput(), recipe.getDye());
+    		return new ColoredBroomExtension(recipe.getId(), recipe.getResultItem(), recipe.getDye());
     	});
     }
 
@@ -77,9 +77,9 @@ public class IntegrationJEI implements IModPlugin {
             for (DyeColor dye : DyeColor.values()) {
                 ItemStack currentStack = ItemEnchantedBroom.setModelType(new ItemStack(ModItems.enchantedBroom.get()), dye.getId());
                 builder.add(new ShapelessRecipe(new ResourceLocation(ModFlyingThings.MOD_ID + ":pumpkin_broom"), "pumpkin_broom",
-                        ItemEnchantedBroom.setHeadType(currentStack.copy(), 1), NonNullList.from(Ingredient.EMPTY,
-                        Ingredient.fromStacks(new ItemStack(Blocks.PUMPKIN)),
-                        Ingredient.fromStacks(currentStack)
+                        ItemEnchantedBroom.setHeadType(currentStack.copy(), 1), NonNullList.of(Ingredient.EMPTY,
+                        Ingredient.of(new ItemStack(Blocks.PUMPKIN)),
+                        Ingredient.of(currentStack)
                 )));
             }
         }

@@ -51,19 +51,19 @@ public abstract class EntityAbstractFlyingThing extends Entity {
 
     public EntityAbstractFlyingThing(EntityType<?> entityType, World world) {
         super(entityType, world);
-        this.preventEntitySpawning = true;
+        this.blocksBuilding = true;
     }
 
     public EntityAbstractFlyingThing(EntityType<?> entityType, World world, double x, double y, double z) {
         this(entityType, world);
-        setPosition(x, y, z);
-        setMotion(Vector3d.ZERO);
-        this.prevPosX = x;
-        this.prevPosY = y;
-        this.prevPosZ = z;
+        setPos(x, y, z);
+        setDeltaMovement(Vector3d.ZERO);
+        this.xo = x;
+        this.yo = y;
+        this.zo = z;
     }
 
-    public IPacket<?> createSpawnPacket() {
+    public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
@@ -84,16 +84,16 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     protected abstract boolean onInteractWithPlayerItem(ItemStack stack, PlayerEntity player, Hand hand);
 
     @Override
-    protected void registerData() {
-        this.dataManager.register(getDataTimeSinceHit(), 0);
-        this.dataManager.register(getDataForwardDirection(), 1);
-        this.dataManager.register(getDataEnergy(), ConfigFlyingThings.shared_datas.maxEnergy.get());
-        this.dataManager.register(getDataDamageTaken(), 0f);
-        this.dataManager.register(getDataModelType(), 0);
+    protected void defineSynchedData() {
+        this.entityData.define(getDataTimeSinceHit(), 0);
+        this.entityData.define(getDataForwardDirection(), 1);
+        this.entityData.define(getDataEnergy(), ConfigFlyingThings.shared_datas.maxEnergy.get());
+        this.entityData.define(getDataDamageTaken(), 0f);
+        this.entityData.define(getDataModelType(), 0);
     }
 
     @Override
-    public void writeAdditional(CompoundNBT tag) {
+    public void addAdditionalSaveData(CompoundNBT tag) {
         tag.putInt("model_type", getModelType());
         tag.putInt("energy", getEnergy());
         tag.putFloat("damage_taken", getDamageTaken());
@@ -101,7 +101,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     @Override
-    public void readAdditional(CompoundNBT tag) {
+    public void readAdditionalSaveData(CompoundNBT tag) {
         if (tag.contains("model_type", Constants.NBT.TAG_INT)) {
             setModelType(tag.getInt("model_type"));
         }
@@ -125,54 +125,54 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     public void setEnergy(int energy) {
-        this.dataManager.set(getDataEnergy(), MathHelper.clamp(energy, 0, ConfigFlyingThings.shared_datas.maxEnergy.get()));
+        this.entityData.set(getDataEnergy(), MathHelper.clamp(energy, 0, ConfigFlyingThings.shared_datas.maxEnergy.get()));
     }
 
     public int getEnergy() {
-        return MathHelper.clamp(this.dataManager.get(getDataEnergy()), 0, ConfigFlyingThings.shared_datas.maxEnergy.get());
+        return MathHelper.clamp(this.entityData.get(getDataEnergy()), 0, ConfigFlyingThings.shared_datas.maxEnergy.get());
     }
 
     public void setDamageTaken(float damage) {
-        this.dataManager.set(getDataDamageTaken(), damage);
+        this.entityData.set(getDataDamageTaken(), damage);
     }
 
     public float getDamageTaken() {
-        return this.dataManager.get(getDataDamageTaken());
+        return this.entityData.get(getDataDamageTaken());
     }
 
     public void setTimeSinceHit(int time) {
-        this.dataManager.set(getDataTimeSinceHit(), time);
+        this.entityData.set(getDataTimeSinceHit(), time);
     }
 
     public int getTimeSinceHit() {
-        return this.dataManager.get(getDataTimeSinceHit());
+        return this.entityData.get(getDataTimeSinceHit());
     }
 
     public void setForwardDirection(int direction) {
-        this.dataManager.set(getDataForwardDirection(), direction);
+        this.entityData.set(getDataForwardDirection(), direction);
     }
 
     public int getForwardDirection() {
-        return this.dataManager.get(getDataForwardDirection());
+        return this.entityData.get(getDataForwardDirection());
     }
 
     public void setModelType(int modelType) {
         if (modelType >= 0) {
-            this.dataManager.set(getDataModelType(), modelType);
+            this.entityData.set(getDataModelType(), modelType);
         }
     }
 
     public int getModelType() {
-        return this.dataManager.get(getDataModelType());
+        return this.entityData.get(getDataModelType());
     }
 
     @Override
-    public ActionResultType processInitialInteract(PlayerEntity player, Hand hand) {
-        if (this.world.isRemote) {
+    public ActionResultType interact(PlayerEntity player, Hand hand) {
+        if (this.level.isClientSide) {
             return ActionResultType.SUCCESS;
         }
-        ItemStack stack = player.getHeldItem(hand);
-        if (!stack.isEmpty() && !isBeingRidden() && !player.isCrouching() && onInteractWithPlayerItem(stack, player, hand)) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!stack.isEmpty() && !isVehicle() && !player.isCrouching() && onInteractWithPlayerItem(stack, player, hand)) {
             return ActionResultType.SUCCESS;
         }
         if (player.isCrouching()) {
@@ -180,16 +180,16 @@ public abstract class EntityAbstractFlyingThing extends Entity {
             remove();
             return ActionResultType.SUCCESS;
         } else {
-            assert player.world.getServer() != null;
-            if (player.world.getServer().isFlightAllowed()) {
-                if (canFlyInDimension(this.world.getDimensionKey())) {
+            assert player.level.getServer() != null;
+            if (player.level.getServer().isFlightAllowed()) {
+                if (canFlyInDimension(this.level.dimension())) {
                     return player.startRiding(this) ? ActionResultType.SUCCESS : ActionResultType.FAIL;
                 } else {
-                    player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", getDisplayName()), Util.DUMMY_UUID);
+                    player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", getDisplayName()), Util.NIL_UUID);
                     return ActionResultType.FAIL;
                 }
             } else if (hand == Hand.MAIN_HAND) {
-                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"), Util.DUMMY_UUID);
+                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"), Util.NIL_UUID);
                 return ActionResultType.FAIL;
             }
         }
@@ -203,7 +203,7 @@ public abstract class EntityAbstractFlyingThing extends Entity {
 
     @Override
     protected void removePassenger(Entity passenger) {
-        boolean valid = !this.world.isRemote && passenger instanceof PlayerEntity && getControllingPassenger() == passenger && passenger.getRidingEntity() != this;
+        boolean valid = !this.level.isClientSide && passenger instanceof PlayerEntity && getControllingPassenger() == passenger && passenger.getVehicle() != this;
         super.removePassenger(passenger);
         if (valid && isAlive()) {
             ItemHandlerHelper.giveItemToPlayer((PlayerEntity) passenger, getStack());
@@ -214,13 +214,13 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (!this.world.isRemote) {
+        if (!this.level.isClientSide) {
             if (getControllingPassenger() != null) {
-                if (getEnergy() > 0 && TimeHelper.atInterval(this.ticksExisted, TimeHelper.tickFromSecond(ConfigFlyingThings.general.timeToLoseEnergy.get()))) {
+                if (getEnergy() > 0 && TimeHelper.atInterval(this.tickCount, TimeHelper.tickFromSecond(ConfigFlyingThings.general.timeToLoseEnergy.get()))) {
                     setEnergy(getEnergy() - 1);
                 }
             } else {
-                if (getEnergy() < ConfigFlyingThings.shared_datas.maxEnergy.get() && TimeHelper.atInterval(this.ticksExisted, TimeHelper.tickFromSecond(ConfigFlyingThings.general.timeToRecoverEnergy.get()))) {
+                if (getEnergy() < ConfigFlyingThings.shared_datas.maxEnergy.get() && TimeHelper.atInterval(this.tickCount, TimeHelper.tickFromSecond(ConfigFlyingThings.general.timeToRecoverEnergy.get()))) {
                     setEnergy(getEnergy() + 1);
                 }
             }
@@ -231,58 +231,58 @@ public abstract class EntityAbstractFlyingThing extends Entity {
         if (getDamageTaken() > 0f) {
             setDamageTaken(getDamageTaken() - 1f);
         }
-        this.prevPosX = getPosX();
-        this.prevPosY = getPosY();
-        this.prevPosZ = getPosZ();
+        this.xo = getX();
+        this.yo = getY();
+        this.zo = getZ();
         final double speedMax = (getEnergy() > 0 ? ConfigFlyingThings.shared_datas.speedMax.get() : ConfigFlyingThings.shared_datas.speedMaxNoEnergy.get()) / 100d;
         if (this.speed > speedMax) {
             double reducedMotion = speedMax / this.speed;
-            setMotion(getMotion().mul(reducedMotion, reducedMotion, reducedMotion));
+            setDeltaMovement(getDeltaMovement().multiply(reducedMotion, reducedMotion, reducedMotion));
             this.speed = speedMax;
         }
-        double initialSpeed = getMotion().length();
+        double initialSpeed = getDeltaMovement().length();
         double newPosX, newPosY, newPosZ;
-        if (this.world.isRemote && !isBeingRidden()) {
+        if (this.level.isClientSide && !isVehicle()) {
             if (this.lerpSteps > 0) {
-                newPosX = getPosX() + (this.lerpX - getPosX()) / (double) this.lerpSteps;
-                newPosY = getPosY() + (this.lerpY - getPosY()) / (double) this.lerpSteps;
-                newPosZ = getPosZ() + (this.lerpZ - getPosZ()) / (double) this.lerpSteps;
-                double d10 = MathHelper.wrapDegrees(this.lerpYaw - (double) this.rotationYaw);
-                this.rotationYaw = (float) ((double) this.rotationYaw + d10 / (double) this.lerpSteps);
-                this.rotationPitch = (float) ((double) this.rotationPitch + (this.lerpPitch - (double) this.rotationPitch) / (double) this.lerpSteps);
+                newPosX = getX() + (this.lerpX - getX()) / (double) this.lerpSteps;
+                newPosY = getY() + (this.lerpY - getY()) / (double) this.lerpSteps;
+                newPosZ = getZ() + (this.lerpZ - getZ()) / (double) this.lerpSteps;
+                double d10 = MathHelper.wrapDegrees(this.lerpYaw - (double) this.yRot);
+                this.yRot = (float) ((double) this.yRot + d10 / (double) this.lerpSteps);
+                this.xRot = (float) ((double) this.xRot + (this.lerpPitch - (double) this.xRot) / (double) this.lerpSteps);
                 --this.lerpSteps;
-                setPositionAndRotation(newPosX, newPosY, newPosZ, this.rotationYaw, this.rotationPitch);
+                absMoveTo(newPosX, newPosY, newPosZ, this.yRot, this.xRot);
             } else {
-                newPosX = getPosX() + getMotion().x;
-                newPosY = getPosY() + getMotion().y;
-                newPosZ = getPosZ() + getMotion().z;
-                setPosition(newPosX, newPosY, newPosZ);
-                setRotation((float) ((double) this.rotationYaw + (this.lerpYaw - (double) this.rotationYaw)), (float) ((double) this.rotationPitch + (this.lerpPitch - (double) this.rotationPitch)));
-                setMotion(getMotion().mul(0.9900000095367432d, 1d, 0.9900000095367432d));
+                newPosX = getX() + getDeltaMovement().x;
+                newPosY = getY() + getDeltaMovement().y;
+                newPosZ = getZ() + getDeltaMovement().z;
+                setPos(newPosX, newPosY, newPosZ);
+                setRot((float) ((double) this.yRot + (this.lerpYaw - (double) this.yRot)), (float) ((double) this.xRot + (this.lerpPitch - (double) this.xRot)));
+                setDeltaMovement(getDeltaMovement().multiply(0.9900000095367432d, 1d, 0.9900000095367432d));
             }
         } else {
             final double accelerationIncrement = ConfigFlyingThings.shared_datas.accelerationIncrement.get() / 100d;
             if (getControllingPassenger() instanceof LivingEntity) {
-                if (((LivingEntity) getControllingPassenger()).moveForward < 0d) {
-                    setMotion(getMotion().mul(1d - accelerationIncrement, 1d, 1d - accelerationIncrement));
-                } else if (((LivingEntity) getControllingPassenger()).moveForward > 0d) {
-                    double dirX = -Math.sin(getControllingPassenger().rotationYaw * Math.PI / 180f);
-                    double dirZ = Math.cos(getControllingPassenger().rotationYaw * Math.PI / 180f);
-                    double dirY = -Math.sin(getControllingPassenger().rotationPitch * Math.PI / 180f);
+                if (((LivingEntity) getControllingPassenger()).zza < 0d) {
+                    setDeltaMovement(getDeltaMovement().multiply(1d - accelerationIncrement, 1d, 1d - accelerationIncrement));
+                } else if (((LivingEntity) getControllingPassenger()).zza > 0d) {
+                    double dirX = -Math.sin(getControllingPassenger().yRot * Math.PI / 180f);
+                    double dirZ = Math.cos(getControllingPassenger().yRot * Math.PI / 180f);
+                    double dirY = -Math.sin(getControllingPassenger().xRot * Math.PI / 180f);
                     if (dirY > -0.5d && dirY < 0.2d) {
                         dirY = 0d;
                     } else if (dirY < 0d) {
                         dirY *= 0.5d;
                     }
-                    setMotion(new Vector3d(getMotion().x + dirX * this.speedFactor * 0.1d, dirY * this.speedFactor * 2d, getMotion().z + dirZ * this.speedFactor * 0.1d));
+                    setDeltaMovement(new Vector3d(getDeltaMovement().x + dirX * this.speedFactor * 0.1d, dirY * this.speedFactor * 2d, getDeltaMovement().z + dirZ * this.speedFactor * 0.1d));
                 }
-            } else if (!isBeingRidden()) {
-                double moX = getMotion().x * 0.9d;
-                double moZ = getMotion().z * 0.9d;
-                setMotion(new Vector3d(Math.abs(moX) < 0.01d ? 0d : moX, getMotion().y - (!this.onGround ? 0.2d : 0d), Math.abs(moZ) < 0.01d ? 0d : moZ));
+            } else if (!isVehicle()) {
+                double moX = getDeltaMovement().x * 0.9d;
+                double moZ = getDeltaMovement().z * 0.9d;
+                setDeltaMovement(new Vector3d(Math.abs(moX) < 0.01d ? 0d : moX, getDeltaMovement().y - (!this.onGround ? 0.2d : 0d), Math.abs(moZ) < 0.01d ? 0d : moZ));
             }
 
-            this.speed = getMotion().length();
+            this.speed = getDeltaMovement().length();
             // about the acceleration
             final double accelerationMax = ConfigFlyingThings.shared_datas.accelerationMax.get() / 100d;
             if (this.speed > initialSpeed && this.speedFactor < accelerationMax) {
@@ -297,30 +297,30 @@ public abstract class EntityAbstractFlyingThing extends Entity {
                 }
             }
             // move
-            move(MoverType.SELF, getMotion());
+            move(MoverType.SELF, getDeltaMovement());
             double reducedMotion = !this.wasOnGround && this.onGround ? 0.5d : 0.9900000095367432d;
             this.wasOnGround = this.onGround;
-            setMotion(getMotion().mul(reducedMotion, reducedMotion, reducedMotion));
+            setDeltaMovement(getDeltaMovement().multiply(reducedMotion, reducedMotion, reducedMotion));
             // about rotations
-            this.rotationPitch = 0f;
-            double rotYaw = this.rotationYaw;
-            double x = this.prevPosX - getPosX();
-            double z = this.prevPosZ - getPosZ();
+            this.xRot = 0f;
+            double rotYaw = this.yRot;
+            double x = this.xo - getX();
+            double z = this.zo - getZ();
             if (x * x + z * z > 0.001d) {
                 rotYaw = (float) (Math.atan2(z, x) * 180d / Math.PI) + 90f;
             }
-            double adjust = MathHelper.wrapDegrees(rotYaw - (double) this.rotationYaw);
-            this.rotationYaw = this.rotationYaw + (float) adjust;
-            setRotation(this.rotationYaw, this.rotationPitch);
-            if (!this.world.isRemote) {
-                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, getBoundingBox().grow(0.20000000298023224d, -0.009999999776482582d, 0.20000000298023224d), p -> !p.isOnSameTeam(this));
+            double adjust = MathHelper.wrapDegrees(rotYaw - (double) this.yRot);
+            this.yRot = this.yRot + (float) adjust;
+            setRot(this.yRot, this.xRot);
+            if (!this.level.isClientSide) {
+                List<Entity> list = this.level.getEntities(this, getBoundingBox().inflate(0.20000000298023224d, -0.009999999776482582d, 0.20000000298023224d), p -> !p.isAlliedTo(this));
                 if (!list.isEmpty()) {
                     for (Entity entity : list) {
-                        if (!entity.isPassenger(this)) {
-                            if (canFitPassenger(entity) && !entity.isPassenger() && entity.getWidth() < this.getWidth() && entity instanceof LivingEntity && !(entity instanceof PlayerEntity)) {
+                        if (!entity.hasPassenger(this)) {
+                            if (canAddPassenger(entity) && !entity.isPassenger() && entity.getBbWidth() < this.getBbWidth() && entity instanceof LivingEntity && !(entity instanceof PlayerEntity)) {
                                 entity.startRiding(this);
-                            } else if (entity.canBePushed()) {
-                                applyEntityCollision(entity);
+                            } else if (entity.isPushable()) {
+                                push(entity);
                             }
                         }
                     }
@@ -331,34 +331,34 @@ public abstract class EntityAbstractFlyingThing extends Entity {
 
     @Override
     @SuppressWarnings("deprecation")
-    protected void doBlockCollisions() {
+    protected void checkInsideBlocks() {
         AxisAlignedBB bounds = getBoundingBox();
         boolean isHighSpeed = this.speed > 0.4d;
         if (isHighSpeed) {
-            bounds = bounds.grow(1d, 0.3d, 1d);
+            bounds = bounds.inflate(1d, 0.3d, 1d);
         }
         BlockPos.Mutable pos0 = new BlockPos.Mutable(bounds.minX + 0.001d, bounds.minY + 0.001d, bounds.minZ + 0.001d);
         BlockPos.Mutable pos1 = new BlockPos.Mutable(bounds.maxX - 0.001d, bounds.maxY - 0.001d, bounds.maxZ - 0.001d);
         BlockPos.Mutable pos2 = new BlockPos.Mutable();
-        if (this.world.isAreaLoaded(pos0, pos1)) {
+        if (this.level.hasChunksAt(pos0, pos1)) {
             for (int i = pos0.getX(); i <= pos1.getX(); ++i) {
                 for (int j = pos0.getY(); j <= pos1.getY(); ++j) {
                     for (int k = pos0.getZ(); k <= pos1.getZ(); ++k) {
-                        pos2.setPos(i, j, k);
-                        BlockState state = this.world.getBlockState(pos2);
+                        pos2.set(i, j, k);
+                        BlockState state = this.level.getBlockState(pos2);
                         try {
-                            if (!this.world.isRemote && state.getMaterial() != Material.AIR && state.getBlock() != Blocks.SOUL_SAND) {
-                                if (ConfigFlyingThings.general.allowToBreakPlant.get() && isHighSpeed && !state.getMaterial().isLiquid() && (state.getMaterial().isReplaceable() || state.getMaterial() == Material.PLANTS || state.getMaterial() == Material.LEAVES)) {
-                                    this.world.destroyBlock(pos2, true);
+                            if (!this.level.isClientSide && state.getMaterial() != Material.AIR && state.getBlock() != Blocks.SOUL_SAND) {
+                                if (ConfigFlyingThings.general.allowToBreakPlant.get() && isHighSpeed && !state.getMaterial().isLiquid() && (state.getMaterial().isReplaceable() || state.getMaterial() == Material.PLANT || state.getMaterial() == Material.LEAVES)) {
+                                    this.level.destroyBlock(pos2, true);
                                 } else {
-                                    state.getBlock().onEntityCollision(state, this.world, pos2, this);
+                                    state.getBlock().entityInside(state, this.level, pos2, this);
                                 }
                             }
                             onInsideBlock(state);
                         } catch (Throwable throwable) {
-                            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Colliding entity with block");
-                            CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being collided with");
-                            CrashReportCategory.addBlockInfo(crashreportcategory, pos2, state);
+                            CrashReport crashreport = CrashReport.forThrowable(throwable, "Colliding entity with block");
+                            CrashReportCategory crashreportcategory = crashreport.addCategory("Block being collided with");
+                            CrashReportCategory.populateBlockDetails(crashreportcategory, pos2, state);
                             throw new ReportedException(crashreport);
                         }
                     }
@@ -368,13 +368,13 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     @Override
-    protected boolean canFitPassenger(Entity passenger) {
-        return canFlyInDimension(this.world.getDimensionKey()) && super.canFitPassenger(passenger) && passenger instanceof PlayerEntity;
+    protected boolean canAddPassenger(Entity passenger) {
+        return canFlyInDimension(this.level.dimension()) && super.canAddPassenger(passenger) && passenger instanceof PlayerEntity;
     }
 
     @Override
     @OnlyIn(value = Dist.CLIENT)
-    public void performHurtAnimation() {
+    public void animateHurt() {
         setForwardDirection(-getForwardDirection());
         setTimeSinceHit(10);
         setDamageTaken(getDamageTaken() * 11f);
@@ -382,28 +382,28 @@ public abstract class EntityAbstractFlyingThing extends Entity {
 
     @Override
     @OnlyIn(value = Dist.CLIENT)
-    public void setVelocity(double x, double y, double z) {
+    public void lerpMotion(double x, double y, double z) {
         this.velocityX = x;
         this.velocityY = y;
         this.velocityZ = z;
-        setMotion(this.velocityX, this.velocityY, this.velocityZ);
+        setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
     }
 
     @Override
     @OnlyIn(value = Dist.CLIENT)
-    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
         this.lerpX = x;
         this.lerpY = y;
         this.lerpZ = z;
         this.lerpYaw = (double) yaw;
         this.lerpPitch = (double) pitch;
-        setMotion(this.velocityX, this.velocityY, this.velocityZ);
-        if (!isBeingRidden()) {
+        setDeltaMovement(this.velocityX, this.velocityY, this.velocityZ);
+        if (!isVehicle()) {
             this.lerpSteps = posRotationIncrements + 5;
         } else {
-            double d3 = x - getPosX();
-            double d4 = y - getPosY();
-            double d5 = z - getPosZ();
+            double d3 = x - getX();
+            double d4 = y - getY();
+            double d5 = z - getZ();
             double d6 = d3 * d3 + d4 * d4 + d5 * d5;
             if (d6 <= 1d) {
                 return;
@@ -413,11 +413,11 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     @Override
-    public void setFire(int amount) {
+    public void setSecondsOnFire(int amount) {
     }
 
     @Override
-    public boolean canTriggerWalking() {
+    public boolean isMovementNoisy() {
         return false;
     }
 
@@ -429,55 +429,55 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     }
 
     @Override
-    public boolean canBeCollidedWith() {
-        return isAlive() && !isBeingRidden();
+    public boolean isPickable() {
+        return isAlive() && !isVehicle();
     }
 
     @Override
-    public void applyEntityCollision(Entity entity) {
+    public void push(Entity entity) {
         if (Helper.isFlyingthing(entity)) {
             if (entity.getBoundingBox().minY < getBoundingBox().maxY) {
-                super.applyEntityCollision(entity);
+                super.push(entity);
             }
         } else if (entity.getBoundingBox().minY <= getBoundingBox().minY) {
-            super.applyEntityCollision(entity);
+            super.push(entity);
         }
     }
 
     @Override
-    public boolean canBePushed() {
+    public boolean isPushable() {
         return true;
     }
 
     @Override
-    public double getMountedYOffset() {
-        return (double) this.getHeight() * 0.5d;
+    public double getPassengersRidingOffset() {
+        return (double) this.getBbHeight() * 0.5d;
     }
 
     @Override
-    public double getYOffset() {
+    public double getMyRidingOffset() {
         return 0d;
     }
 
     @Override
-    public boolean attackEntityFrom(DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
         if (isInvulnerableTo(source)) {
             return false;
         }
-        if (!this.world.isRemote && isAlive()) {
-            if (source instanceof IndirectEntityDamageSource && source.getTrueSource() != null && isPassenger(source.getTrueSource())) {
+        if (!this.level.isClientSide && isAlive()) {
+            if (source instanceof IndirectEntityDamageSource && source.getEntity() != null && hasPassenger(source.getEntity())) {
                 return false;
             }
             setForwardDirection(-getForwardDirection());
             setTimeSinceHit(10);
             setDamageTaken(getDamageTaken() + amount * 10f);
-            markVelocityChanged();
-            boolean creativeDamage = source.getTrueSource() instanceof PlayerEntity && ((PlayerEntity) source.getTrueSource()).abilities.isCreativeMode;
+            markHurt();
+            boolean creativeDamage = source.getEntity() instanceof PlayerEntity && ((PlayerEntity) source.getEntity()).abilities.instabuild;
             if (creativeDamage || getDamageTaken() > 40f) {
                 if (Helper.isValidPlayer(getControllingPassenger())) {
                     ItemHandlerHelper.giveItemToPlayer((PlayerEntity) getControllingPassenger(), getStack());
                 } else {
-                    entityDropItem(getStack(), 0f);
+                    spawnAtLocation(getStack(), 0f);
                 }
                 remove();
             }
@@ -488,28 +488,28 @@ public abstract class EntityAbstractFlyingThing extends Entity {
     @Override
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
-        if (canPassengerSteer() && this.lerpSteps > 0) {
+        if (isControlledByLocalInstance() && this.lerpSteps > 0) {
             this.lerpSteps = 0;
-            setPosition(this.lerpX, this.lerpY, this.lerpZ);
-            this.rotationYaw = (float) this.lerpYaw;
-            this.rotationPitch = (float) this.lerpPitch;
+            setPos(this.lerpX, this.lerpY, this.lerpZ);
+            this.yRot = (float) this.lerpYaw;
+            this.xRot = (float) this.lerpPitch;
         }
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void applyOrientationToEntity(Entity entityToUpdate) {
-        float f = MathHelper.wrapDegrees(entityToUpdate.rotationYaw - this.rotationYaw);
+    public void onPassengerTurned(Entity entityToUpdate) {
+        float f = MathHelper.wrapDegrees(entityToUpdate.yRot - this.yRot);
         float f1 = MathHelper.clamp(f, -105f, 105f);
-        entityToUpdate.prevRotationYaw += f1 - f;
-        entityToUpdate.rotationYaw += f1 - f;
+        entityToUpdate.yRotO += f1 - f;
+        entityToUpdate.yRot += f1 - f;
 
-        entityToUpdate.setRenderYawOffset(this.rotationYaw);
+        entityToUpdate.setYBodyRot(this.yRot);
         //entityToUpdate.setRotationYawHead(this.rotationYaw);
     }
 
     @Override
     public ITextComponent getName() {
-        if (!this.world.isRemote) {
+        if (!this.level.isClientSide) {
             Entity owner = getControllingPassenger();
             if (owner != null) {
                 return owner.getName();

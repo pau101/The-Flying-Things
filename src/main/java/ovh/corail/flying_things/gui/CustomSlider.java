@@ -17,10 +17,10 @@ public class CustomSlider extends OptionSlider {
 
     @SuppressWarnings("deprecation")
 	@Override
-    public void renderWidget(MatrixStack matrixStack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+    public void renderButton(MatrixStack matrixStack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
         Minecraft minecraft = Minecraft.getInstance();
-        FontRenderer fontrenderer = minecraft.fontRenderer;
-        minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
+        FontRenderer fontrenderer = minecraft.font;
+        minecraft.getTextureManager().bind(WIDGETS_LOCATION);
         RenderSystem.color4f(0x52 / 255f, 0xaa / 255f, 0xfb / 255f, 0x40 / 255f);
         int i = this.getYImage(this.isHovered());
         RenderSystem.enableBlend();
@@ -29,11 +29,11 @@ public class CustomSlider extends OptionSlider {
         this.blit(matrixStack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
         this.blit(matrixStack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
 
-        minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
+        minecraft.getTextureManager().bind(WIDGETS_LOCATION);
         RenderSystem.color4f(0x52 / 255f, 0xaa / 255f, 0xfb / 255f, 0x40 / 255f);
         i = (this.isHovered() ? 2 : 1) * 20;
-        this.blit(matrixStack, this.x + (int)(this.sliderValue * (double)(this.width - 8)), this.y, 0, 46 + i, 4, 20);
-        this.blit(matrixStack, this.x + (int)(this.sliderValue * (double)(this.width - 8)) + 4, this.y, 196, 46 + i, 4, 20);
+        this.blit(matrixStack, this.x + (int)(this.value * (double)(this.width - 8)), this.y, 0, 46 + i, 4, 20);
+        this.blit(matrixStack, this.x + (int)(this.value * (double)(this.width - 8)) + 4, this.y, 196, 46 + i, 4, 20);
 
         int j = getFGColor();
         drawCenteredString(matrixStack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);

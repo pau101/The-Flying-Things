@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 @OnlyIn(Dist.CLIENT)
 public class Functions {
-    private static final Function<ResourceLocation, RenderType> FLYING_THINGS_GLINT = rl -> RenderType.makeType("flying_things_glint", DefaultVertexFormats.POSITION_COLOR_TEX_LIGHTMAP, 7, 256, RenderType.State.getBuilder().texture(new RenderState.TextureState(rl, true, false)).writeMask(new RenderState.WriteMaskState(true, false)).depthTest(new RenderState.DepthTestState("==", 514)).transparency(new RenderState.TransparencyState("glint_transparency", () -> {
+    private static final Function<ResourceLocation, RenderType> FLYING_THINGS_GLINT = rl -> RenderType.create("flying_things_glint", DefaultVertexFormats.POSITION_COLOR_TEX_LIGHTMAP, 7, 256, RenderType.State.builder().setTextureState(new RenderState.TextureState(rl, true, false)).setWriteMaskState(new RenderState.WriteMaskState(true, false)).setDepthTestState(new RenderState.DepthTestState("==", 514)).setTransparencyState(new RenderState.TransparencyState("glint_transparency", () -> {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.ONE);
         RenderSystem.enableCull();
@@ -25,19 +25,19 @@ public class Functions {
         RenderSystem.disableCull();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
-    })).texturing(new RenderState.TexturingState("glint_texturing", () -> {
+    })).setTexturingState(new RenderState.TexturingState("glint_texturing", () -> {
         setupGlintTexturing(1f);
     }, () -> {
         RenderSystem.matrixMode(5890);
         RenderSystem.popMatrix();
         RenderSystem.matrixMode(5888);
-    })).build(false));
+    })).createCompositeState(false));
 
     private static void setupGlintTexturing(float scaleIn) {
         RenderSystem.matrixMode(5890);
         RenderSystem.pushMatrix();
         RenderSystem.loadIdentity();
-        long i = Util.milliTime() * 8L;
+        long i = Util.getMillis() * 8L;
         float f = (float)(i % 110000L) / 110000f;
         float f1 = (float)(i % 30000L) / 30000f;
         RenderSystem.translatef(-f, f1, 0f);
@@ -46,7 +46,7 @@ public class Functions {
         RenderSystem.matrixMode(5888);
     }
 
-    public static final BiFunction<IRenderTypeBuffer, ResourceLocation, IVertexBuilder> VERTEX_BUILDER_CUTOUT = (iRenderTypeBuffer, rl) -> iRenderTypeBuffer.getBuffer(RenderType.getEntityCutout(rl));
+    public static final BiFunction<IRenderTypeBuffer, ResourceLocation, IVertexBuilder> VERTEX_BUILDER_CUTOUT = (iRenderTypeBuffer, rl) -> iRenderTypeBuffer.getBuffer(RenderType.entityCutout(rl));
     private static final BiFunction<IRenderTypeBuffer, ResourceLocation, IVertexBuilder> VERTEX_BUILDER_GLINTER = (iRenderTypeBuffer, rl) -> iRenderTypeBuffer.getBuffer(FLYING_THINGS_GLINT.apply(rl));
     public static final Function<IRenderTypeBuffer, IVertexBuilder> VERTEX_BUILDER_GLINT = iRenderTypeBuffer -> VERTEX_BUILDER_GLINTER.apply(iRenderTypeBuffer, TextureLocation.TEXTURE_EFFECT);
 }

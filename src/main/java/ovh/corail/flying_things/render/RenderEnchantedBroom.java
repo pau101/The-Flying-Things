@@ -24,17 +24,17 @@ public class RenderEnchantedBroom extends EntityRenderer<EntityEnchantedBroom> {
 
     public RenderEnchantedBroom(EntityRendererManager renderManager) {
         super(renderManager);
-        this.shadowSize = this.shadowOpaque = 0.2f;
+        this.shadowRadius = this.shadowStrength = 0.2f;
     }
 
     @Override
     public void render(EntityEnchantedBroom entity, float entityYaw, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int light) {
-        render(entity, entityYaw, entity.ticksExisted, partialTicks, matrixStack, iRenderTypeBuffer, light, false);
+        render(entity, entityYaw, entity.tickCount, partialTicks, matrixStack, iRenderTypeBuffer, light, false);
         super.render(entity, entityYaw, partialTicks, matrixStack, iRenderTypeBuffer, light);
     }
 
     @Override
-    public ResourceLocation getEntityTexture(EntityEnchantedBroom entity) {
+    public ResourceLocation getTextureLocation(EntityEnchantedBroom entity) {
         return getTexture(entity);
     }
 
@@ -44,16 +44,16 @@ public class RenderEnchantedBroom extends EntityRenderer<EntityEnchantedBroom> {
 
     @Override
     public boolean shouldRender(EntityEnchantedBroom entity, ClippingHelper camera, double camX, double camY, double camZ) {
-        return entity.world == null || super.shouldRender(entity, camera, camX, camY, camZ);
+        return entity.level == null || super.shouldRender(entity, camera, camX, camY, camZ);
     }
 
     public static void render(EntityEnchantedBroom entity, float entityYaw, int ticksExisted, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int packedLight, boolean isTEISR) {
-        matrixStack.push();
+        matrixStack.pushPose();
 
         if (!isTEISR) {
             matrixStack.translate(0d, 0.2d, 0d);
         }
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(180f - entityYaw));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(180f - entityYaw));
         if (!isTEISR) {
             float f = (float) entity.getTimeSinceHit() - partialTicks;
             float f1 = entity.getDamageTaken() - partialTicks;
@@ -61,19 +61,19 @@ public class RenderEnchantedBroom extends EntityRenderer<EntityEnchantedBroom> {
                 f1 = 0f;
             }
             if (f > 0f) {
-                matrixStack.rotate(Vector3f.XP.rotationDegrees(MathHelper.sin(f) * f * f1 / 10f * (float) entity.getForwardDirection()));
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(MathHelper.sin(f) * f * f1 / 10f * (float) entity.getForwardDirection()));
             }
         }
 
-        model.render(matrixStack, VERTEX_BUILDER_CUTOUT.apply(iRenderTypeBuffer, getTexture(entity)), packedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+        model.renderToBuffer(matrixStack, VERTEX_BUILDER_CUTOUT.apply(iRenderTypeBuffer, getTexture(entity)), packedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
 
         if (entity.getHeadType() > 0) {
-            matrixStack.push();
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(180f));
+            matrixStack.pushPose();
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180f));
             model.head.render(matrixStack, VERTEX_BUILDER_CUTOUT.apply(iRenderTypeBuffer, TextureLocation.TEXTURE_SKULL[entity.getHeadType() - 1]), packedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
-            matrixStack.pop();
+            matrixStack.popPose();
         }
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
 

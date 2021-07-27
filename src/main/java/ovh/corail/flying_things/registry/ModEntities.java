@@ -17,24 +17,24 @@ public class ModEntities {
 	public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, MOD_ID);
 	
 	public static final RegistryObject<EntityType<EntityMagicCarpet>> magic_carpet = ENTITIES.register("magic_carpet", () -> {
-		return EntityType.Builder.<EntityMagicCarpet>create(EntityMagicCarpet::new, EntityClassification.MISC)
+		return EntityType.Builder.<EntityMagicCarpet>of(EntityMagicCarpet::new, EntityClassification.MISC)
 			.setTrackingRange(80)
 			.setUpdateInterval(1)
 			.setShouldReceiveVelocityUpdates(true)
-			.size(1.5f, 0.3f)
+			.sized(1.5f, 0.3f)
 			.setCustomClientFactory(EntityMagicCarpet::new)
-			.disableSummoning()
+			.noSummon()
 			.build(MOD_ID + ":magic_carpet");
 	});
 	
 	public static final RegistryObject<EntityType<EntityEnchantedBroom>> enchanted_broom = ENTITIES.register("enchanted_broom", () -> {
-		return EntityType.Builder.<EntityEnchantedBroom>create(EntityEnchantedBroom::new, EntityClassification.MISC)
+		return EntityType.Builder.<EntityEnchantedBroom>of(EntityEnchantedBroom::new, EntityClassification.MISC)
 				.setTrackingRange(80)
 				.setUpdateInterval(1)
 				.setShouldReceiveVelocityUpdates(true)
-				.size(1.2f, 0.2f)
+				.sized(1.2f, 0.2f)
 				.setCustomClientFactory(EntityEnchantedBroom::new)
-				.disableSummoning()
+				.noSummon()
 				.build(MOD_ID + ":enchanted_broom");
 	});
 	

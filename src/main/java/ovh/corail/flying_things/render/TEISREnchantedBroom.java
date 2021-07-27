@@ -18,7 +18,7 @@ public class TEISREnchantedBroom extends ItemStackTileEntityRenderer {
     private EntityEnchantedBroom entity;
     
     @Override
-    public void func_239207_a_(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void renderByItem(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
     	if(entity == null) {
     		entity = ModEntities.enchanted_broom.get().create(null);
     	}
@@ -26,6 +26,6 @@ public class TEISREnchantedBroom extends ItemStackTileEntityRenderer {
         entity.setModelType(ItemEnchantedBroom.getModelType(stack));
         entity.setHeadType(ItemEnchantedBroom.getHeadType(stack));
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        RenderEnchantedBroom.render(entity, 0f, player != null ? player.ticksExisted : 0, Minecraft.getInstance().getRenderPartialTicks(), matrixStack, iRenderTypeBuffer, combinedLight, true);
+        RenderEnchantedBroom.render(entity, 0f, player != null ? player.tickCount : 0, Minecraft.getInstance().getFrameTime(), matrixStack, iRenderTypeBuffer, combinedLight, true);
     }
 }

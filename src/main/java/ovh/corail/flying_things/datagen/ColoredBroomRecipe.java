@@ -37,29 +37,29 @@ public class ColoredBroomRecipe implements IFinishedRecipe {
 	}
 	
 	@Override
-	public void serialize(JsonObject json) {
+	public void serializeRecipeData(JsonObject json) {
 		json.addProperty("broom", broom.getRegistryName().toString());
 		json.addProperty("dye", dye.getRegistryName().toString());
 		json.addProperty("modelType", this.modelType);
 	}
 
 	@Override
-	public ResourceLocation getID() {
+	public ResourceLocation getId() {
 		return this.id;
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer() {
+	public IRecipeSerializer<?> getType() {
 		return ForgeRegistries.RECIPE_SERIALIZERS.getValue(new ResourceLocation(ModFlyingThings.MOD_ID, "colored_broom"));
 	}
 
 	@Override
-	public JsonObject getAdvancementJson() {
-		return this.advancementBuilder.serialize();
+	public JsonObject serializeAdvancement() {
+		return this.advancementBuilder.serializeToJson();
 	}
 
 	@Override
-	public ResourceLocation getAdvancementID() {
+	public ResourceLocation getAdvancementId() {
 		return this.advancementId;
 	}
 	
@@ -72,7 +72,7 @@ public class ColoredBroomRecipe implements IFinishedRecipe {
 		private final Item broom;
 		private DyeItem dye;
 		private int modelType;
-		private final Advancement.Builder advancementBuilder = Advancement.Builder.builder();
+		private final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
 
 		public Builder(IItemProvider broom) {
 			this.broom = broom.asItem();
@@ -93,7 +93,7 @@ public class ColoredBroomRecipe implements IFinishedRecipe {
 		}
 
 		public Builder addCriterion(String name, ICriterionInstance criterionIn) {
-			this.advancementBuilder.withCriterion(name, criterionIn);
+			this.advancementBuilder.addCriterion(name, criterionIn);
 			return this;
 		}
 		
@@ -102,8 +102,8 @@ public class ColoredBroomRecipe implements IFinishedRecipe {
 		}
 		
 		public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
-			this.advancementBuilder.withParentId(new ResourceLocation("recipes/root")).withCriterion("has_the_recipe", RecipeUnlockedTrigger.create(id)).withRewards(AdvancementRewards.Builder.recipe(id)).withRequirementsStrategy(IRequirementsStrategy.OR);
-			ResourceLocation advancmentRL = new ResourceLocation(id.getNamespace(), "recipes/" + this.broom.getGroup().getPath() + "/" + id.getPath());
+			this.advancementBuilder.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(IRequirementsStrategy.OR);
+			ResourceLocation advancmentRL = new ResourceLocation(id.getNamespace(), "recipes/" + this.broom.getItemCategory().getRecipeFolderName() + "/" + id.getPath());
 			consumerIn.accept(new ColoredBroomRecipe(id, this.broom, this.dye, this.modelType, this.advancementBuilder, advancmentRL));
 		}
 

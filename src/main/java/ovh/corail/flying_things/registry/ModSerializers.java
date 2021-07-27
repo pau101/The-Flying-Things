@@ -35,8 +35,8 @@ public class ModSerializers {
     public static void onRegisterSerializers(final RegistryEvent.Register<IRecipeSerializer<?>> event) {
     	event.getRegistry().register(new RecipeColoredBroom.Serializer().setRegistryName(MOD_ID, "colored_broom"));
         event.getRegistry().register(new SpecialRecipeSerializer<>(RecipePumkinBroom::new).setRegistryName(MOD_ID, "pumpkin_broom"));
-        event.getRegistry().register(new SpecialRecipeSerializer<>(rl -> new RecipeRaidCarpet(rl, 18, Ingredient.fromStacks(new ItemStack(Items.PRISMARINE_CRYSTALS)))).setRegistryName(MOD_ID, "pillage_0"));
-        event.getRegistry().register(new SpecialRecipeSerializer<>(rl -> new RecipeRaidCarpet(rl, 19, Ingredient.fromStacks(new ItemStack(Items.QUARTZ)))).setRegistryName(MOD_ID, "pillage_1"));
+        event.getRegistry().register(new SpecialRecipeSerializer<>(rl -> new RecipeRaidCarpet(rl, 18, Ingredient.of(new ItemStack(Items.PRISMARINE_CRYSTALS)))).setRegistryName(MOD_ID, "pillage_0"));
+        event.getRegistry().register(new SpecialRecipeSerializer<>(rl -> new RecipeRaidCarpet(rl, 19, Ingredient.of(new ItemStack(Items.QUARTZ)))).setRegistryName(MOD_ID, "pillage_1"));
     }
     
     @SubscribeEvent

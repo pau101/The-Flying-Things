@@ -19,7 +19,7 @@ public class HalloweenLootCondition implements ILootCondition {
 	}
 
 	@Override
-	public LootConditionType getConditionType() {
+	public LootConditionType getType() {
 		return ModSerializers.IS_HALLOWEEN;
 	}
 	

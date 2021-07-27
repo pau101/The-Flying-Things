@@ -33,7 +33,7 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
     private static final int MAX_ID = 19;
 
     public ItemMagicCarpet() {
-        super("magic_carpet", getBuilder(true).maxStackSize(1).setISTER(() -> TEISRMagicCarpet::new));
+        super("magic_carpet", getBuilder(true).stacksTo(1).setISTER(() -> TEISRMagicCarpet::new));
     }
 
     @Override
@@ -42,8 +42,8 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-        if (isInGroup(group)) {
+    public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
+        if (allowdedIn(group)) {
             for (int i = 0; i <= MAX_ID; i++) {
                 ItemStack stack = new ItemStack(this);
                 setModelType(stack, i);
@@ -59,15 +59,15 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
 
     @Override
     public int getActualRegen(ItemStack stack, World world, Entity entity, int slot, boolean isSelected) {
-        boolean hasSpecialRegen = ConfigFlyingThings.general.allowSpecialRegen.get() && world.isBlockLoaded(entity.getPosition().down()) && world.getBlockState(entity.getPosition().down()).getBlock() == Blocks.SOUL_SAND;
+        boolean hasSpecialRegen = ConfigFlyingThings.general.allowSpecialRegen.get() && world.hasChunkAt(entity.blockPosition().below()) && world.getBlockState(entity.blockPosition().below()).getBlock() == Blocks.SOUL_SAND;
         return hasSpecialRegen ? 20 : 1;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         if (!Screen.hasShiftDown()) {
-            list.add(new TranslationTextComponent(MOD_ID + ".message.hold_key", "SHIFT").appendSibling(new StringTextComponent(" ")).appendSibling(new TranslationTextComponent(MOD_ID + ".message.for_more_infos")));
+            list.add(new TranslationTextComponent(MOD_ID + ".message.hold_key", "SHIFT").append(new StringTextComponent(" ")).append(new TranslationTextComponent(MOD_ID + ".message.for_more_infos")));
         } else {
             list.add(new TranslationTextComponent(MOD_ID + ".item.magic_carpet.desc1"));
             list.add(new TranslationTextComponent(MOD_ID + ".item.magic_carpet.desc2", Helper.getNameForKeybindSneak()));
@@ -75,14 +75,14 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
         int id = getModelType(stack);
         if ((id == 18 || id == 19)) {
             ClientPlayerEntity player = Minecraft.getInstance().player;
-            if (player != null && !player.isPotionActive(Effects.HERO_OF_THE_VILLAGE)) {
-                list.add(new TranslationTextComponent(MOD_ID + ".message.require_effect", new StringTextComponent("[").appendSibling(new TranslationTextComponent(Effects.HERO_OF_THE_VILLAGE.getName())).appendString("]")));
+            if (player != null && !player.hasEffect(Effects.HERO_OF_THE_VILLAGE)) {
+                list.add(new TranslationTextComponent(MOD_ID + ".message.require_effect", new StringTextComponent("[").append(new TranslationTextComponent(Effects.HERO_OF_THE_VILLAGE.getDescriptionId())).append("]")));
             }
         }
     }
 
     @Override
-    public ITextComponent getDisplayName(ItemStack stack) {
+    public ITextComponent getName(ItemStack stack) {
         int modelType = getModelType(stack);
         String postName = "";
         if (modelType == 18 || modelType == 19) {
@@ -90,7 +90,7 @@ public class ItemMagicCarpet extends ItemAbstractFlyingThing {
         } else if (modelType > 8 && modelType < 14) {
             postName = ".halloween";
         }
-        return new TranslationTextComponent(getTranslationKey(stack) + postName);
+        return new TranslationTextComponent(getDescriptionId(stack) + postName);
     }
 
     @Override

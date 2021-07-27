@@ -17,8 +17,8 @@ public class RecipePumkinBroom extends ShapelessRecipe {
     private static final NonNullList<Ingredient> INGREDIENTS = NonNullList.create();
 
     static {
-        INGREDIENTS.add(Ingredient.fromStacks(ItemEnchantedBroom.setModelType(new ItemStack(ModItems.enchantedBroom.get()), 12)));
-        INGREDIENTS.add(Ingredient.fromStacks(new ItemStack(Blocks.PUMPKIN)));
+        INGREDIENTS.add(Ingredient.of(ItemEnchantedBroom.setModelType(new ItemStack(ModItems.enchantedBroom.get()), 12)));
+        INGREDIENTS.add(Ingredient.of(new ItemStack(Blocks.PUMPKIN)));
     }
 
     public RecipePumkinBroom(ResourceLocation rl) {
@@ -26,7 +26,7 @@ public class RecipePumkinBroom extends ShapelessRecipe {
     }
 
     @Override
-    public boolean isDynamic() {
+    public boolean isSpecial() {
         return true;
     }
 
@@ -37,14 +37,14 @@ public class RecipePumkinBroom extends ShapelessRecipe {
         }
         boolean hasBroom = false, hasPumkin = false;
         int count = 0;
-        for (int i = 0; i < inv.getSizeInventory(); i++) {
-            if (inv.getStackInSlot(i).isEmpty()) {
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            if (inv.getItem(i).isEmpty()) {
                 continue;
             }
-            if (inv.getStackInSlot(i).getItem() == ModItems.enchantedBroom.get()) {
+            if (inv.getItem(i).getItem() == ModItems.enchantedBroom.get()) {
                 hasBroom = true;
                 count++;
-            } else if (INGREDIENTS.get(1).test(inv.getStackInSlot(i))) {
+            } else if (INGREDIENTS.get(1).test(inv.getItem(i))) {
                 hasPumkin = true;
                 count++;
             }
@@ -56,11 +56,11 @@ public class RecipePumkinBroom extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack assemble(CraftingInventory inv) {
         ItemStack broom = ItemStack.EMPTY;
         ItemStack dye = ItemStack.EMPTY;
-        for (int i = 0; i < inv.getSizeInventory(); i++) {
-            ItemStack stack = inv.getStackInSlot(i);
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack stack = inv.getItem(i);
             if (stack.isEmpty()) {
                 continue;
             }

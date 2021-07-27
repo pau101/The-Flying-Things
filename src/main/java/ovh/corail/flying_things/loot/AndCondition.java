@@ -21,7 +21,7 @@ public class AndCondition implements ILootCondition {
 
 	public AndCondition(ILootCondition[] conditionsIn) {
 		this.conditions = conditionsIn;
-		this.contextPredicate = LootConditionManager.and(conditionsIn);
+		this.contextPredicate = LootConditionManager.andConditions(conditionsIn);
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class AndCondition implements ILootCondition {
 	}
 
 	@Override
-	public LootConditionType getConditionType() {
+	public LootConditionType getType() {
 		return ModSerializers.AND;
 	}
 	
@@ -43,7 +43,7 @@ public class AndCondition implements ILootCondition {
 
 		@Override
 		public AndCondition deserialize(JsonObject obj, JsonDeserializationContext context) {
-			ILootCondition[] ailootcondition = JSONUtils.deserializeClass(obj, "terms", context, ILootCondition[].class);
+			ILootCondition[] ailootcondition = JSONUtils.getAsObject(obj, "terms", context, ILootCondition[].class);
 	         return new AndCondition(ailootcondition);
 		}
 		

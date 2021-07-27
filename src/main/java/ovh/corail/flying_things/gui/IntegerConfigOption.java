@@ -41,17 +41,17 @@ public class IntegerConfigOption extends AbstractOption {
     }
 
     @Override
-    public Widget createWidget(GameSettings options, int x, int y, int width) {
+    public Widget createButton(GameSettings options, int x, int y, int width) {
         return new OptionButton(x, y, width, 14, this, getOptionName(), pressable -> {
             set(this.supplier.getAsInt() >= this.max ? 0 : this.supplier.getAsInt() + 1);
             pressable.setMessage(getOptionName());
         }) {
             @Override
-            public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+            public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
                 Minecraft minecraft = Minecraft.getInstance();
                 renderBg(matrixStack, minecraft, mouseX, mouseY);
                 int j = isHovered() ? 0xff897235 : 0xffffffff;
-                drawCenteredString(matrixStack, minecraft.fontRenderer, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
+                drawCenteredString(matrixStack, minecraft.font, getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255f) << 24);
             }
         };
     }

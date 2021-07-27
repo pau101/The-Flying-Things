@@ -17,7 +17,7 @@ public class ModTabs {
     public static final ItemGroup tabFlyingThings = (new ItemGroup(MOD_ID) {
         @Override
         @OnlyIn(Dist.CLIENT)
-        public ItemStack createIcon() {
+        public ItemStack makeIcon() {
             ItemStack stack = new ItemStack(ModItems.enchantedBroom.get());
             ItemEnchantedBroom.setModelType(stack, Helper.getRandom(0, DyeColor.values().length - 1));
             return stack;
@@ -25,7 +25,7 @@ public class ModTabs {
         
         @OnlyIn(Dist.CLIENT)
         @Override
-        public ITextComponent getGroupName() {
+        public ITextComponent getDisplayName() {
         	return new StringTextComponent(MOD_NAME);
         };
     });
