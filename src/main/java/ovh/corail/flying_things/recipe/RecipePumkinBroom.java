@@ -8,7 +8,6 @@ import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.helper.Helper;
 import ovh.corail.flying_things.item.ItemEnchantedBroom;
 import ovh.corail.flying_things.registry.ModItems;
@@ -32,7 +31,7 @@ public class RecipePumkinBroom extends ShapelessRecipe {
 
     @Override
     public boolean matches(CraftingInventory inv, World world) {
-        if (world == null || (!Helper.isDateAroundHalloween() && !ConfigFlyingThings.general.persistantHolidays.get())) {
+        if (world == null || !Helper.isDateAroundHalloween()) {
             return false;
         }
         boolean hasBroom = false, hasPumkin = false;

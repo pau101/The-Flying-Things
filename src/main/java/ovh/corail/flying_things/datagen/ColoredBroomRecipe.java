@@ -18,14 +18,17 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 import ovh.corail.flying_things.ModFlyingThings;
 
-public class ColoredBroomRecipe implements IFinishedRecipe {
-	
+/**
+ * Used to generate JSON recipes during datagen to color the broom
+ */
+class ColoredBroomRecipe implements IFinishedRecipe {
+
 	private final ResourceLocation id;
-    private final Item broom;
+	private final Item broom;
 	private final DyeItem dye;
 	private final int modelType;
-    private final Advancement.Builder advancementBuilder;
-    private final ResourceLocation advancementId;
+	private final Advancement.Builder advancementBuilder;
+	private final ResourceLocation advancementId;
 
 	public ColoredBroomRecipe(ResourceLocation id, Item broom, DyeItem dye, int modelType, Advancement.Builder advancementBuilder, ResourceLocation advancementId) {
 		this.id = id;
@@ -35,7 +38,7 @@ public class ColoredBroomRecipe implements IFinishedRecipe {
 		this.advancementBuilder = advancementBuilder;
 		this.advancementId = advancementId;
 	}
-	
+
 	@Override
 	public void serializeRecipeData(JsonObject json) {
 		json.addProperty("broom", broom.getRegistryName().toString());
@@ -62,7 +65,7 @@ public class ColoredBroomRecipe implements IFinishedRecipe {
 	public ResourceLocation getAdvancementId() {
 		return this.advancementId;
 	}
-	
+
 	public static Builder recipe(IItemProvider result) {
 		return new Builder(result);
 	}
@@ -96,13 +99,16 @@ public class ColoredBroomRecipe implements IFinishedRecipe {
 			this.advancementBuilder.addCriterion(name, criterionIn);
 			return this;
 		}
-		
+
 		public void build(Consumer<IFinishedRecipe> consumerIn) {
 			this.build(consumerIn, this.broom.getRegistryName());
 		}
-		
+
 		public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
-			this.advancementBuilder.parent(new ResourceLocation("recipes/root")).addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id)).rewards(AdvancementRewards.Builder.recipe(id)).requirements(IRequirementsStrategy.OR);
+			this.advancementBuilder.parent(new ResourceLocation("recipes/root"))
+				.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id))
+				.rewards(AdvancementRewards.Builder.recipe(id))
+				.requirements(IRequirementsStrategy.OR);
 			ResourceLocation advancmentRL = new ResourceLocation(id.getNamespace(), "recipes/" + this.broom.getItemCategory().getRecipeFolderName() + "/" + id.getPath());
 			consumerIn.accept(new ColoredBroomRecipe(id, this.broom, this.dye, this.modelType, this.advancementBuilder, advancmentRL));
 		}
