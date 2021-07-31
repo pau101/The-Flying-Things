@@ -10,8 +10,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.LogicalSide;
@@ -41,27 +43,27 @@ public class Helper {
     }
 
     public static boolean isValidPlayerMP(@Nullable Entity entity) {
-        return isValidPlayer(entity) && !entity.world.isRemote;
+        return isValidPlayer(entity) && !entity.level.isClientSide;
     }
 
     public static boolean isFlyingthing(@Nullable Entity entity) {
-        return entity != null && (entity.getType() == ModEntities.enchanted_broom || entity.getType() == ModEntities.magic_carpet);
+        return entity != null && (entity.getType() == ModEntities.enchanted_broom.get() || entity.getType() == ModEntities.magic_carpet.get());
     }
 
     public static boolean isBoss(@Nullable Entity entity) {
-        return entity != null && !entity.isNonBoss();
+        return entity != null && !entity.canChangeDimensions();
     }
 
     public static boolean isRidingFlyingThing(@Nullable Entity entity) {
-        return entity != null && isFlyingthing(entity.getRidingEntity());
+        return entity != null && isFlyingthing(entity.getVehicle());
     }
 
     public static boolean isControllingFlyingThing(@Nullable Entity entity) {
-        return isRidingFlyingThing(entity) && entity.getRidingEntity().getControllingPassenger() == entity;
+        return isRidingFlyingThing(entity) && entity.getVehicle().getControllingPassenger() == entity;
     }
 
-    public static String getDimensionString(DimensionType dimensionType) {
-        ResourceLocation rl = DimensionType.getKey(dimensionType);
+    public static String getDimensionString(RegistryKey<World> dimensionType) {
+        ResourceLocation rl = dimensionType.location();
         return rl == null ? "" : rl.toString();
     }
 
@@ -77,15 +79,15 @@ public class Helper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static String getNameForKeybindSneak() {
-        return Minecraft.getInstance().gameSettings.keyBindSneak.getLocalizedName();
+    public static ITextComponent getNameForKeybindSneak() {
+        return Minecraft.getInstance().options.keyShift.getTranslatedKeyMessage();
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void removeClientPotionEffect(Effect effect) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
         if (player != null) {
-            player.removeActivePotionEffect(effect);
+            player.removeEffectNoUpdate(effect);
         }
     }
 
@@ -93,7 +95,7 @@ public class Helper {
     public static MinecraftServer getServer() {
         try {
             MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-            if (server != null && server.isOnExecutionThread()) {
+            if (server != null && server.isSameThread()) {
                 return server;
             }
         } catch (Exception ignored) {
@@ -144,13 +146,13 @@ public class Helper {
         RenderSystem.defaultBlendFunc();
         RenderSystem.shadeModel(GL11.GL_SMOOTH);
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
         makeVertex(bufferbuilder, right, top, zLevel, isHorizontal ? argb2 : argb1);
         makeVertex(bufferbuilder, left, top, zLevel, argb1);
         makeVertex(bufferbuilder, left, bottom, zLevel, isHorizontal ? argb1 : argb2);
         makeVertex(bufferbuilder, right, bottom, zLevel, argb2);
-        tessellator.draw();
+        tessellator.end();
         RenderSystem.shadeModel(GL11.GL_FLAT);
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -158,6 +160,6 @@ public class Helper {
     }
 
     private static void makeVertex(BufferBuilder bufferbuilder, int x, int y, int zLevel, float[] colorArray) {
-        bufferbuilder.pos(x, y, zLevel).color(colorArray[0], colorArray[1], colorArray[2], colorArray[3]).endVertex();
+        bufferbuilder.vertex(x, y, zLevel).color(colorArray[0], colorArray[1], colorArray[2], colorArray[3]).endVertex();
     }
 }

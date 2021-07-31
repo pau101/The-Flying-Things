@@ -27,10 +27,6 @@ public class ConfigFlyingThings {
         public final ConfigValue<Boolean> allowSpecialRegen;
         public final ConfigValue<Integer> chanceToFallWithProjectile;
         public final ConfigValue<Boolean> persistantHolidays;
-        public final ConfigValue<Integer> chanceDropPhialOfAnimationInChest;
-        public final ConfigValue<Integer> chanceDropPhialOfAnimationOnBoss;
-        public final ConfigValue<Integer> chanceDropPumpkinStick;
-        public final ConfigValue<List<String>> treasureLootTable;
 
         public General(ForgeConfigSpec.Builder builder) {
             builder.comment("Theses options can only be modified on the server in multiplayer").push("general");
@@ -63,22 +59,6 @@ public class ConfigFlyingThings {
                     .comment("Allow special holiday events outside periods [false/true|default:true]")
                     .translation(getTranslation("persistant_holidays"))
                     .define("persistant_holidays", true);
-            chanceDropPumpkinStick = builder
-                    .comment("Chance to get Halloween Sticks during this event [0..1000|default:10]")
-                    .translation(getTranslation("chance_drop_pumpkin_stick"))
-                    .defineInRange("chance_drop_pumpkin_stick", 10, 0, 1000);
-            chanceDropPhialOfAnimationInChest = builder
-                    .comment("Chance to get a Phial of Animation in chest [0..1000|default:50]")
-                    .translation(getTranslation("chance_drop_phial_of_animation_in_chest"))
-                    .defineInRange("chance_drop_phial_of_animation_in_chest", 50, 0, 1000);
-            chanceDropPhialOfAnimationOnBoss = builder
-                    .comment("Chance to get a Phial of Animation on boss [0..1000|default:200]")
-                    .translation(getTranslation("chance_drop_phial_of_animation_on_boss"))
-                    .defineInRange("chance_drop_phial_of_animation_on_boss", 200, 0, 1000);
-            treasureLootTable = builder
-                    .comment("Defines the loottables having a chance to contain a Phial of Animation")
-                    .translation(getTranslation("treasure_loot_table"))
-                    .define("treasure_loot_table", Lists.newArrayList("minecraft:chests/end_city_treasure", "minecraft:chests/abandoned_mineshaft", "minecraft:chests/nether_bridge", "minecraft:chests/stronghold_library", "minecraft:chests/desert_pyramid", "minecraft:chests/jungle_temple", "minecraft:chests/igloo_chest", "minecraft:chests/woodland_mansion"));
 
             builder.pop();
         }

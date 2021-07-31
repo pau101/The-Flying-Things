@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,14 +15,17 @@ import ovh.corail.flying_things.registry.ModEntities;
 
 @OnlyIn(Dist.CLIENT)
 public class TEISREnchantedBroom extends ItemStackTileEntityRenderer {
-    private final EntityEnchantedBroom entity = ModEntities.enchanted_broom.create(null);
-
+    private EntityEnchantedBroom entity;
+    
     @Override
-    public void render(ItemStack stack, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLightIn, int combinedOverlayIn) {
-        assert entity != null;
+    public void renderByItem(ItemStack stack, TransformType transformType, MatrixStack matrixStack, IRenderTypeBuffer iRenderTypeBuffer, int combinedLight, int combinedOverlay) {
+    	if(entity == null) {
+    		entity = ModEntities.enchanted_broom.get().create(null);
+    	}
+    	
         entity.setModelType(ItemEnchantedBroom.getModelType(stack));
         entity.setHeadType(ItemEnchantedBroom.getHeadType(stack));
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        RenderEnchantedBroom.render(entity, 0f, player != null ? player.ticksExisted : 0, Minecraft.getInstance().getRenderPartialTicks(), matrixStack, iRenderTypeBuffer, combinedLightIn, true);
+        RenderEnchantedBroom.render(entity, 0f, player != null ? player.tickCount : 0, Minecraft.getInstance().getFrameTime(), matrixStack, iRenderTypeBuffer, combinedLight, true);
     }
 }

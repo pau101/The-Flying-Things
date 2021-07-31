@@ -16,12 +16,12 @@ import static ovh.corail.flying_things.ModFlyingThings.MOD_ID;
 public class ItemPumpkinStick extends ItemGeneric {
 
     public ItemPumpkinStick() {
-        super("pumpkin_stick", getBuilder(true).maxStackSize(1));
+        super("pumpkin_stick", getBuilder(true).stacksTo(1));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         list.add(new TranslationTextComponent(MOD_ID + ".item." + name + ".desc"));
     }
 }

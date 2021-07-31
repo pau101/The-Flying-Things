@@ -10,11 +10,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.registries.ForgeRegistries;
 import ovh.corail.flying_things.config.ConfigFlyingThings;
 import ovh.corail.flying_things.entity.EntityAbstractFlyingThing;
@@ -25,7 +26,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
 
     abstract EntityType<?> getEntityType();
 
-    abstract boolean canFlyInDimension(DimensionType dimType);
+    abstract boolean canFlyInDimension(RegistryKey<World> dimType);
 
     abstract void onEntitySpawn(ItemStack stack, EntityAbstractFlyingThing entity);
 
@@ -34,49 +35,49 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (player.isPassenger() || player.getCooldownTracker().hasCooldown(this)) {
-            return ActionResult.resultFail(stack);
+    public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (player.isPassenger() || player.getCooldowns().isOnCooldown(this)) {
+            return ActionResult.fail(stack);
         }
         if (stack.getItem() != this) {
-            return ActionResult.resultPass(stack);
+            return ActionResult.pass(stack);
         }
-        if (!world.isRemote) {
-            MinecraftServer server = player.world.getServer();
+        if (!world.isClientSide) {
+            MinecraftServer server = player.level.getServer();
             if (server != null && !server.isFlightAllowed()) {
-                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"));
-                return ActionResult.resultFail(stack);
+                player.sendMessage(new TranslationTextComponent("flying_things.message.flight_not_allowed"), Util.NIL_UUID);
+                return ActionResult.fail(stack);
             }
-            if (!canFlyInDimension(world.dimension.getType())) {
-                player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", stack.getDisplayName()));
-                return ActionResult.resultFail(stack);
+            if (!canFlyInDimension(world.dimension())) {
+                player.sendMessage(new TranslationTextComponent("flying_things.message.denied_dimension_to_fly", stack.getHoverName()), Util.NIL_UUID);
+                return ActionResult.fail(stack);
             }
-            player.getCooldownTracker().setCooldown(this, 100);
+            player.getCooldowns().addCooldown(this, 100);
             EntityAbstractFlyingThing entity;
             try {
                 entity = (EntityAbstractFlyingThing) getEntityType().create(world);
             } catch (Exception e) {
-                return ActionResult.resultFail(stack);
+                return ActionResult.fail(stack);
             }
             if (entity != null) {
-                entity.setModelType(getModelType(player.getHeldItem(hand)));
+                entity.setModelType(getModelType(player.getItemInHand(hand)));
                 entity.setEnergy(getEnergy(stack));
                 entity.setSoulbound(hasSoulbound(stack));
-                if (stack.hasDisplayName()) {
-                    entity.setCustomName(stack.getDisplayName());
+                if (stack.hasCustomHoverName()) {
+                    entity.setCustomName(stack.getHoverName());
                 }
-                entity.setPositionAndRotation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, 0f);
-                entity.setRotationYawHead(player.rotationYaw);
+                entity.absMoveTo(player.getX(), player.getY(), player.getZ(), player.yRot, 0f);
+                entity.setYHeadRot(player.yRot);
                 onEntitySpawn(stack, entity);
-                world.addEntity(entity);
+                world.addFreshEntity(entity);
                 if (!player.isCrouching()) {
                     player.startRiding(entity);
                 }
-                player.setHeldItem(hand, ItemStack.EMPTY);
+                player.setItemInHand(hand, ItemStack.EMPTY);
             }
         }
-        return ActionResult.resultSuccess(stack);
+        return ActionResult.success(stack);
     }
 
     @Override
@@ -86,7 +87,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
 
     @Override
     public int getRGBDurabilityForDisplay(ItemStack stack) {
-        return MathHelper.hsvToRGB(Math.max(0f, (float) (1f - getDurabilityForDisplay(stack))) / 1.5f, 1f, 1f);
+        return MathHelper.hsvToRgb(Math.max(0f, (float) (1f - getDurabilityForDisplay(stack))) / 1.5f, 1f, 1f);
     }
 
     @Override
@@ -114,7 +115,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean isSelected) {
-        if (!world.isRemote && getEnergy(stack) < ConfigFlyingThings.shared_datas.maxEnergy.get() && entity.ticksExisted % (ConfigFlyingThings.general.timeToRecoverEnergy.get() * 20) == 0) {
+        if (!world.isClientSide && getEnergy(stack) < ConfigFlyingThings.shared_datas.maxEnergy.get() && entity.tickCount % (ConfigFlyingThings.general.timeToRecoverEnergy.get() * 20) == 0) {
             setEnergy(stack, getEnergy(stack) + getActualRegen(stack, world, entity, slot, isSelected));
         }
     }
@@ -134,17 +135,17 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
             return false;
         }
         assert enchantment.getRegistryName() != null;
-        return ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get() && stack.getEnchantmentTagList().size() == 0 && enchantment.getRegistryName().equals(SOULBOUND_LOCATION);
+        return ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get() && stack.getEnchantmentTags().size() == 0 && enchantment.getRegistryName().equals(SOULBOUND_LOCATION);
     }
 
     @Override
-    public int getItemEnchantability() {
+    public int getEnchantmentValue() {
         return 1;
     }
 
     @Override
     public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-        return ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get() && stack.getEnchantmentTagList().size() == 0 && EnchantedBookItem.getEnchantments(book).size() == 1 && hasSoulbound(book);
+        return ConfigFlyingThings.shared_datas.allowTombstoneSoulbound.get() && stack.getEnchantmentTags().size() == 0 && EnchantedBookItem.getEnchantments(book).size() == 1 && hasSoulbound(book);
     }
 
     public static void setSoulbound(ItemStack stack) {
@@ -155,7 +156,7 @@ public abstract class ItemAbstractFlyingThing extends ItemGeneric {
         if (soulbound == null) {
             return;
         }
-        stack.addEnchantment(soulbound, 1);
+        stack.enchant(soulbound, 1);
     }
 
     private static boolean hasSoulbound(ItemStack stack) {

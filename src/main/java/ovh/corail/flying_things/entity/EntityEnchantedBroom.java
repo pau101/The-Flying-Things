@@ -13,10 +13,10 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.FMLPlayMessages;
 import ovh.corail.flying_things.config.ConfigFlyingThings;
@@ -28,31 +28,31 @@ import ovh.corail.flying_things.registry.ModEntities;
 import ovh.corail.flying_things.registry.ModItems;
 
 public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
-    private static final DataParameter<Integer> ENERGY = EntityDataManager.createKey(EntityEnchantedBroom.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> TIME_SINCE_HIT = EntityDataManager.createKey(EntityEnchantedBroom.class, DataSerializers.VARINT);
-    private static final DataParameter<Float> DAMAGE_TAKEN = EntityDataManager.createKey(EntityEnchantedBroom.class, DataSerializers.FLOAT);
-    private static final DataParameter<Integer> FORWARD_DIRECTION = EntityDataManager.createKey(EntityEnchantedBroom.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> MODEL_TYPE = EntityDataManager.createKey(EntityEnchantedBroom.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> HEAD_TYPE = EntityDataManager.createKey(EntityEnchantedBroom.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> ENERGY = EntityDataManager.defineId(EntityEnchantedBroom.class, DataSerializers.INT);
+    private static final DataParameter<Integer> TIME_SINCE_HIT = EntityDataManager.defineId(EntityEnchantedBroom.class, DataSerializers.INT);
+    private static final DataParameter<Float> DAMAGE_TAKEN = EntityDataManager.defineId(EntityEnchantedBroom.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> FORWARD_DIRECTION = EntityDataManager.defineId(EntityEnchantedBroom.class, DataSerializers.INT);
+    private static final DataParameter<Integer> MODEL_TYPE = EntityDataManager.defineId(EntityEnchantedBroom.class, DataSerializers.INT);
+    private static final DataParameter<Integer> HEAD_TYPE = EntityDataManager.defineId(EntityEnchantedBroom.class, DataSerializers.INT);
 
     public EntityEnchantedBroom(EntityType<EntityEnchantedBroom> entityType, World world) {
         super(entityType, world);
     }
 
     public EntityEnchantedBroom(World world, double x, double y, double z) {
-        super(ModEntities.enchanted_broom, world, x, y, z);
+        super(ModEntities.enchanted_broom.get(), world, x, y, z);
     }
 
     public EntityEnchantedBroom(FMLPlayMessages.SpawnEntity spawnEntity, World world) {
-        this(ModEntities.enchanted_broom, world);
+        this(ModEntities.enchanted_broom.get(), world);
     }
 
     @Override
     public ItemStack getStack() {
-        ItemStack stack = new ItemStack(ModItems.enchantedBroom);
+        ItemStack stack = new ItemStack(ModItems.enchantedBroom.get());
         ItemAbstractFlyingThing.setModelType(stack, getModelType());
         if (hasCustomName()) {
-            stack.setDisplayName(getCustomName());
+            stack.setHoverName(getCustomName());
         }
         ItemAbstractFlyingThing.setEnergy(stack, getEnergy());
         if (hasSoulbound()) {
@@ -65,8 +65,8 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
     }
 
     @Override
-    public boolean canFlyInDimension(DimensionType dimensionType) {
-        if (world.isRemote) {
+    public boolean canFlyInDimension(RegistryKey<World> dimensionType) {
+        if (level.isClientSide) {
             return true;
         }
         return !ConfigFlyingThings.deniedDimensionToFly.deniedDimensionBroom.get().contains(Helper.getDimensionString(dimensionType));
@@ -74,13 +74,13 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
 
     @Override
     public void tick() {
-        if (ConfigFlyingThings.general.allowSpecialRegen.get() && getEnergy() < ConfigFlyingThings.shared_datas.maxEnergy.get() && TimeHelper.atInterval(this.ticksExisted, 10) && this.world.isBlockLoaded(getPosition().down()) && this.world.getBlockState(getPosition().down()).getBlock() == Blocks.RED_MUSHROOM_BLOCK) {
-            if (!this.world.isRemote) {
+        if (ConfigFlyingThings.general.allowSpecialRegen.get() && getEnergy() < ConfigFlyingThings.shared_datas.maxEnergy.get() && TimeHelper.atInterval(this.tickCount, 10) && this.level.hasChunkAt(blockPosition().below()) && this.level.getBlockState(blockPosition().below()).getBlock() == Blocks.RED_MUSHROOM_BLOCK) {
+            if (!this.level.isClientSide) {
                 setEnergy(getEnergy() + 4);
-                this.world.playSound(null, getPosition(), SoundEvents.ENTITY_ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.5f, 0.5f);
+                this.level.playSound(null, blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundCategory.PLAYERS, 0.5f, 0.5f);
             } else {
                 for (int i = 0; i < Helper.getRandom(10, 45); i++) {
-                    this.world.addParticle(ParticleTypes.WITCH, getPosX() + this.rand.nextGaussian() * 0.4d, getBoundingBox().maxY + this.rand.nextGaussian() * 0.12999999523162842d, getPosZ() + this.rand.nextGaussian() * 0.4d, 0d, 0d, 0d);
+                    this.level.addParticle(ParticleTypes.WITCH, getX() + this.random.nextGaussian() * 0.4d, getBoundingBox().maxY + this.random.nextGaussian() * 0.12999999523162842d, getZ() + this.random.nextGaussian() * 0.4d, 0d, 0d, 0d);
                 }
             }
         }
@@ -88,7 +88,7 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
     }
 
     @Override
-    public double getMountedYOffset() {
+    public double getPassengersRidingOffset() {
         return 0d;
     }
 
@@ -97,29 +97,29 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
     protected boolean onInteractWithPlayerItem(ItemStack stack, PlayerEntity player, Hand hand) {
         if (stack.getItem() instanceof DyeItem) {
             setModelType(((DyeItem) stack.getItem()).getDyeColor().getId());
-            if (!player.abilities.isCreativeMode) {
+            if (!player.abilities.instabuild) {
                 stack.shrink(1);
             }
             return true;
-        } else if (stack.getItem() == Item.getItemFromBlock(Blocks.WET_SPONGE)) {
+        } else if (stack.getItem() == Item.byBlock(Blocks.WET_SPONGE)) {
             setModelType(12);
             return true;
-        } else if (stack.getItem() == Items.NAME_TAG && stack.hasDisplayName()) {
-            setCustomName(stack.getDisplayName());
-            if (!player.abilities.isCreativeMode) {
+        } else if (stack.getItem() == Items.NAME_TAG && stack.hasCustomHoverName()) {
+            setCustomName(stack.getHoverName());
+            if (!player.abilities.instabuild) {
                 stack.shrink(1);
             }
             return true;
         } else if (Helper.isDateAroundHalloween()) {
-            if (stack.getItem() == Item.getItemFromBlock(Blocks.PUMPKIN)) {
+            if (stack.getItem() == Item.byBlock(Blocks.PUMPKIN)) {
                 setHeadType(1);
-                if (!player.abilities.isCreativeMode) {
+                if (!player.abilities.instabuild) {
                     stack.shrink(1);
                 }
                 return true;
             } else if (stack.getItem() == Items.SKELETON_SKULL) {
                 setHeadType(2);
-                if (!player.abilities.isCreativeMode) {
+                if (!player.abilities.instabuild) {
                     stack.shrink(1);
                 }
                 return true;
@@ -154,28 +154,28 @@ public class EntityEnchantedBroom extends EntityAbstractFlyingThing {
     }
 
     public int getHeadType() {
-        return this.dataManager.get(HEAD_TYPE);
+        return this.entityData.get(HEAD_TYPE);
     }
 
     public void setHeadType(int headType) {
-        this.dataManager.set(HEAD_TYPE, headType);
+        this.entityData.set(HEAD_TYPE, headType);
     }
 
     @Override
-    protected void registerData() {
-        super.registerData();
-        this.dataManager.register(HEAD_TYPE, 0);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(HEAD_TYPE, 0);
     }
 
     @Override
-    public void writeAdditional(CompoundNBT tag) {
-        super.writeAdditional(tag);
+    public void addAdditionalSaveData(CompoundNBT tag) {
+        super.addAdditionalSaveData(tag);
         tag.putInt("head_type", getHeadType());
     }
 
     @Override
-    public void readAdditional(CompoundNBT tag) {
-        super.readAdditional(tag);
+    public void readAdditionalSaveData(CompoundNBT tag) {
+        super.readAdditionalSaveData(tag);
         if (tag.contains("head_type", Constants.NBT.TAG_INT)) {
             setHeadType(tag.getInt("head_type"));
         }

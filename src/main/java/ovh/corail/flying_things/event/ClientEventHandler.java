@@ -37,10 +37,10 @@ import static ovh.corail.flying_things.ModFlyingThings.MOD_NAME;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 @SuppressWarnings({ "unused", "FieldCanBeLocal" })
 public class ClientEventHandler {
-    private static final KeyBinding keybindConfig;
-
-    static {
-        ClientRegistry.registerKeyBinding(keybindConfig = new KeyBinding("Configuration Screen", KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID, MOD_NAME));
+    private static KeyBinding keybindConfig;
+    
+    public static void registerKeybind() {
+    	ClientRegistry.registerKeyBinding(keybindConfig = new KeyBinding("Configuration Screen", KeyConflictContext.IN_GAME, InputMappings.UNKNOWN, MOD_NAME));
     }
 
     private static boolean HAS_TRUE_SIGHT = false, REQUIRE_REMOVAL_NIGHTVISION = false;
@@ -74,10 +74,10 @@ public class ClientEventHandler {
     public static void onRenderTick(TickEvent.RenderTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             ClientPlayerEntity player = Minecraft.getInstance().player;
-            HAS_TRUE_SIGHT = ConfigFlyingThings.general.allowToFlyInWater.get() && Helper.isRidingFlyingThing(player) && Minecraft.getInstance().gameRenderer.getActiveRenderInfo().getBlockAtCamera().getMaterial() == Material.WATER;
+            HAS_TRUE_SIGHT = ConfigFlyingThings.general.allowToFlyInWater.get() && Helper.isRidingFlyingThing(player) && Minecraft.getInstance().gameRenderer.getMainCamera().getBlockAtCamera().getMaterial() == Material.WATER;
             if (HAS_TRUE_SIGHT) {
-                if (!player.isPotionActive(Effects.NIGHT_VISION)) {
-                    player.addPotionEffect(new EffectInstance(Effects.NIGHT_VISION, 1200, 0, true, false));
+                if (!player.hasEffect(Effects.NIGHT_VISION)) {
+                    player.addEffect(new EffectInstance(Effects.NIGHT_VISION, 1200, 0, true, false));
                     REQUIRE_REMOVAL_NIGHTVISION = true;
                 }
             }
@@ -108,14 +108,14 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.world == null || mc.isGamePaused()) {
+        if (mc.level == null || mc.isPaused()) {
             return;
         }
         if (event.phase == TickEvent.Phase.END && Helper.isValidPlayer(mc.player)) {
             // open gui knowledge
-            if (keybindConfig.isPressed()) {
-                if (mc.currentScreen == null || mc.currentScreen instanceof ChatScreen) {
-                    mc.displayGuiScreen(new GuiConfig(mc));
+            if (keybindConfig.consumeClick()) {
+                if (mc.screen == null || mc.screen instanceof ChatScreen) {
+                    mc.setScreen(new GuiConfig(mc));
                 }
             }
         }

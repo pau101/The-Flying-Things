@@ -18,13 +18,13 @@ public class ItemPhialOfAnimation extends ItemGeneric {
     }
 
     @Override
-    public boolean hasEffect(ItemStack stack) {
+    public boolean isFoil(ItemStack stack) {
         return true;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flag) {
         list.add(new TranslationTextComponent("flying_things.item.phial_of_animation.desc1"));
     }
 }

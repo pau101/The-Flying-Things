@@ -4,6 +4,7 @@ import net.minecraft.client.GameSettings;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.settings.SliderPercentageOption;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.util.List;
 
@@ -19,19 +20,19 @@ public class ColorButtonHandler {
 
         this.button1 = new CustomSelectionButton(settings, x, y, width, height,
                 new SliderPercentageOption(title + "_R", 0d, 255d, 1f,
-                        s -> (double) this.r, (s, d) -> this.r = d.intValue(), (s, d) -> title + "_R"), this::getMinColorR, this::getMaxColorR
+                        s -> (double) this.r, (s, d) -> this.r = d.intValue(), (s, d) -> new StringTextComponent(title + "_R")), this::getMinColorR, this::getMaxColorR
         );
         list.add(button1);
         children.add(button1);
         this.button2 = new CustomSelectionButton(settings, x, y + 6, width, height,
                 new SliderPercentageOption(title + "_G", 0d, 255d, 1f,
-                        s -> (double) this.g, (s, d) -> this.g = d.intValue(), (s, d) -> title + "_G"), this::getMinColorG, this::getMaxColorG
+                        s -> (double) this.g, (s, d) -> this.g = d.intValue(), (s, d) -> new StringTextComponent(title + "_G")), this::getMinColorG, this::getMaxColorG
         );
         list.add(button2);
         children.add(button2);
         this.button3 = new CustomSelectionButton(settings, x, y + 12, width, height,
                 new SliderPercentageOption(title + "_B", 0d, 255d, 1f,
-                        s -> (double) this.b, (s, d) -> this.b = d.intValue(), (s, d) -> title + "_B"), this::getMinColorB, this::getMaxColorB
+                        s -> (double) this.b, (s, d) -> this.b = d.intValue(), (s, d) -> new StringTextComponent(title + "_B")), this::getMinColorB, this::getMaxColorB
         );
         list.add(button3);
         children.add(button3);

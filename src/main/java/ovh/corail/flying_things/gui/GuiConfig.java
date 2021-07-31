@@ -1,5 +1,6 @@
 package ovh.corail.flying_things.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -34,15 +35,15 @@ public class GuiConfig extends Screen {
         this.guiRight = this.guiLeft + this.xSize;
         this.buttons.clear();
         int sliderX = this.guiRight - 60;
-        addButton(new CustomSlider(getMinecraft().gameSettings, sliderX, this.guiTop + 57, 50, 20, new SliderPercentageOption("bar_pos_y", 0d, 100d, 1f, settings -> (double) ConfigFlyingThings.client.barHeightPos.get(), (settings, d) -> ConfigFlyingThings.client.barHeightPos.set(d.intValue()), (settings, slider) -> MathHelper.floor(slider.get(settings)) + "%")));
-        addButton(new BooleanConfigOption("Render Effect", ConfigFlyingThings.client.renderEffect::get, ConfigFlyingThings.client.renderEffect::set).createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 80, this.xSize));
-        addButton(new BooleanConfigOption("Display Bar Values", ConfigFlyingThings.client.barValue::get, ConfigFlyingThings.client.barValue::set).createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 100, this.xSize));
+        addButton(new CustomSlider(getMinecraft().options, sliderX, this.guiTop + 57, 50, 20, new SliderPercentageOption("bar_pos_y", 0d, 100d, 1f, settings -> (double) ConfigFlyingThings.client.barHeightPos.get(), (settings, d) -> ConfigFlyingThings.client.barHeightPos.set(d.intValue()), (settings, slider) -> new StringTextComponent(MathHelper.floor(slider.get(settings)) + "%"))));
+        addButton(new BooleanConfigOption("Render Effect", ConfigFlyingThings.client.renderEffect::get, ConfigFlyingThings.client.renderEffect::set).createButton(getMinecraft().options, this.guiLeft + 3, this.guiTop + 80, this.xSize));
+        addButton(new BooleanConfigOption("Display Bar Values", ConfigFlyingThings.client.barValue::get, ConfigFlyingThings.client.barValue::set).createButton(getMinecraft().options, this.guiLeft + 3, this.guiTop + 100, this.xSize));
         int[] colors = Helper.getRGBColor3I(ConfigFlyingThings.client.barColorEnergy.get());
-        this.colorHandler1 = new ColorButtonHandler(getMinecraft().gameSettings, this.buttons, this.children, this.halfWidth + 10, this.guiTop + 120, 80, 4, colors[0], colors[1], colors[2], "energy_bar_color");
+        this.colorHandler1 = new ColorButtonHandler(getMinecraft().options, this.buttons, this.children, this.halfWidth + 10, this.guiTop + 120, 80, 4, colors[0], colors[1], colors[2], "energy_bar_color");
         colors = Helper.getRGBColor3I(ConfigFlyingThings.client.barColorSpeed.get());
-        this.colorHandler2 = new ColorButtonHandler(getMinecraft().gameSettings, this.buttons, this.children, this.halfWidth + 10, this.guiTop + 140, 80, 4, colors[0], colors[1], colors[2], "speed_bar_color");
-        addButton(new IntegerConfigOption("Energy Bar Graduation", () -> ConfigFlyingThings.client.barGraduationEnergy.get().ordinal(), i -> ConfigFlyingThings.client.barGraduationEnergy.set(Graduation.values()[i]), Graduation.values().length - 1, i -> "Energy Bar Graduation : " + Graduation.values()[i].name()).createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 160, 190));
-        addButton(new IntegerConfigOption("Speed Bar Graduation", () -> ConfigFlyingThings.client.barGraduationSpeed.get().ordinal(), i -> ConfigFlyingThings.client.barGraduationSpeed.set(Graduation.values()[i]), Graduation.values().length - 1, i -> "Speed Bar Graduation : " + Graduation.values()[i].name()).createWidget(getMinecraft().gameSettings, this.guiLeft + 3, this.guiTop + 180, 190));
+        this.colorHandler2 = new ColorButtonHandler(getMinecraft().options, this.buttons, this.children, this.halfWidth + 10, this.guiTop + 140, 80, 4, colors[0], colors[1], colors[2], "speed_bar_color");
+        addButton(new IntegerConfigOption("Energy Bar Graduation", () -> ConfigFlyingThings.client.barGraduationEnergy.get().ordinal(), i -> ConfigFlyingThings.client.barGraduationEnergy.set(Graduation.values()[i]), Graduation.values().length - 1, i -> "Energy Bar Graduation : " + Graduation.values()[i].name()).createButton(getMinecraft().options, this.guiLeft + 3, this.guiTop + 160, 190));
+        addButton(new IntegerConfigOption("Speed Bar Graduation", () -> ConfigFlyingThings.client.barGraduationSpeed.get().ordinal(), i -> ConfigFlyingThings.client.barGraduationSpeed.set(Graduation.values()[i]), Graduation.values().length - 1, i -> "Speed Bar Graduation : " + Graduation.values()[i].name()).createButton(getMinecraft().options, this.guiLeft + 3, this.guiTop + 180, 190));
     }
 
     @Override
@@ -51,7 +52,7 @@ public class GuiConfig extends Screen {
     }
 
     @Override
-    public void onClose() {
+    public void removed() {
         int color1 = this.colorHandler1.getColor();
         if (color1 != ConfigFlyingThings.client.barColorEnergy.get()) {
             ConfigFlyingThings.client.barColorEnergy.set(color1);
@@ -60,35 +61,34 @@ public class GuiConfig extends Screen {
         if (color2 != ConfigFlyingThings.client.barColorSpeed.get()) {
             ConfigFlyingThings.client.barColorSpeed.set(color2);
         }
-        super.onClose();
+        super.removed();
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        renderBackground();
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        renderBackground(matrixStack);
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        fill(this.guiLeft + 5, this.guiTop + 5, this.guiRight - 5, this.guiTop + 20 + font.FONT_HEIGHT, this.bgColor);
-        drawStringAt(title.getFormattedText(), 14, this.textColor, true);
+        fill(matrixStack, this.guiLeft + 5, this.guiTop + 5, this.guiRight - 5, this.guiTop + 20 + font.lineHeight, this.bgColor);
+        drawStringAt(matrixStack, title.getString(), 14, this.textColor, true);
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        drawStringAt("Bar Pos Y (in %)", 65);
-        drawStringAt("Speed Bar Color", 125, this.colorHandler1.getColor(), false);
-        drawStringAt("Energy Bar Color", 145, this.colorHandler2.getColor(), false);
-        super.render(mouseX, mouseY, partialTicks);
+        drawStringAt(matrixStack, "Bar Pos Y (in %)", 65);
+        drawStringAt(matrixStack, "Speed Bar Color", 125, this.colorHandler1.getColor(), false);
+        drawStringAt(matrixStack, "Energy Bar Color", 145, this.colorHandler2.getColor(), false);
+        super.render(matrixStack, mouseX, mouseY, partialTicks);
     }
 
-    private void drawStringAt(String text, int y) {
-        drawStringAt(text, y, this.textColor, false);
+    private void drawStringAt(MatrixStack matrixStack, String text, int y) {
+        drawStringAt(matrixStack, text, y, this.textColor, false);
     }
 
-    private void drawStringAt(String text, int y, int textColor, boolean centered) {
-        drawString(this.font, text, centered ? this.halfWidth - this.font.getStringWidth(text) / 2 : this.guiLeft + 10, this.guiTop + y, textColor);
+    private void drawStringAt(MatrixStack matrixStack, String text, int y, int textColor, boolean centered) {
+        drawString(matrixStack, this.font, text, centered ? this.halfWidth - this.font.width(text) / 2 : this.guiLeft + 10, this.guiTop + y, textColor);
     }
 
-
-        @Override
-    public void renderBackground() {
-        super.renderBackground();
-        fill(0, 0, this.width, this.height, 0x80000000);
-        fill(this.guiLeft - 3, this.guiTop - 3, this.guiLeft + this.xSize + 3, this.guiTop + this.ySize + 3, this.bgColor);
+    @Override
+    public void renderBackground(MatrixStack matrixStack) {
+        super.renderBackground(matrixStack);
+        fill(matrixStack, 0, 0, this.width, this.height, 0x80000000);
+        fill(matrixStack, this.guiLeft - 3, this.guiTop - 3, this.guiLeft + this.xSize + 3, this.guiTop + this.ySize + 3, this.bgColor);
     }
 }

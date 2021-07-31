@@ -1,9 +1,0 @@
-{
-  "type": "crafting_shaped",
-  "pattern": ["012", "041", "300"],
-  "key": {
-    "0": {"item": "minecraft:lapis_lazuli"}, "1": {"item": "minecraft:string"}, "2": {"item": "minecraft:wheat"},
-    "3": {"tag": "minecraft:logs"}, "4": {"item": "flying_things:phial_of_animation"}
-  },
-  "result": {"item": "flying_things:enchanted_broom", "nbt": "{model_type:12}"}
-}

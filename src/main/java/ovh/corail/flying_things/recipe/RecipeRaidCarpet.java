@@ -16,30 +16,30 @@ import ovh.corail.flying_things.registry.ModItems;
 import javax.annotation.Nullable;
 
 public class RecipeRaidCarpet extends ShapedRecipe {
-    private static final Ingredient BROWN_CARPET = Ingredient.fromStacks(new ItemStack(Items.BROWN_CARPET));
-    private static final Ingredient SHIELD = Ingredient.fromStacks(new ItemStack(Items.SHIELD));
+    private static final Ingredient BROWN_CARPET = Ingredient.of(new ItemStack(Items.BROWN_CARPET));
+    private static final Ingredient SHIELD = Ingredient.of(new ItemStack(Items.SHIELD));
 
     public RecipeRaidCarpet(ResourceLocation rl, int modelType, Ingredient gemIngredient) {
-        super(rl, "", 3, 3, NonNullList.from(Ingredient.EMPTY,
+        super(rl, "", 3, 3, NonNullList.of(Ingredient.EMPTY,
                 BROWN_CARPET, gemIngredient, BROWN_CARPET,
                 BROWN_CARPET, SHIELD, BROWN_CARPET,
                 BROWN_CARPET, gemIngredient, BROWN_CARPET
-        ), ItemMagicCarpet.setModelType(new ItemStack(ModItems.magicCarpet), modelType));
+        ), ItemMagicCarpet.setModelType(new ItemStack(ModItems.magicCarpet.get()), modelType));
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack assemble(CraftingInventory inv) {
         PlayerEntity player = getPlayer(inv);
-        if (player != null && player.isPotionActive(Effects.HERO_OF_THE_VILLAGE)) {
-            return getRecipeOutput().copy();
+        if (player != null && player.hasEffect(Effects.HERO_OF_THE_VILLAGE)) {
+            return getResultItem().copy();
         }
         return ItemStack.EMPTY;
     }
 
     @Nullable
     private static PlayerEntity getPlayer(final CraftingInventory inventory) {
-        return inventory.eventHandler.inventorySlots.stream()
-                .map(slot -> slot.inventory)
+        return inventory.menu.slots.stream()
+                .map(slot -> slot.container)
                 .filter(PlayerInventory.class::isInstance)
                 .map(PlayerInventory.class::cast)
                 .map(inv -> inv.player)

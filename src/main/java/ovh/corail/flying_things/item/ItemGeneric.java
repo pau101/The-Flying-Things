@@ -37,16 +37,16 @@ public class ItemGeneric extends Item {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean hasEffect(ItemStack stack) {
+    public boolean isFoil(ItemStack stack) {
         return this.hasEffect || NBTStackHelper.getBoolean(stack, "enchant");
     }
 
     @Override
-    public String getTranslationKey(ItemStack stack) {
+    public String getDescriptionId(ItemStack stack) {
         return MOD_ID + ".item." + this.name;
     }
 
     static Properties getBuilder(boolean hasTab) {
-        return new Properties().group(hasTab ? tabFlyingThings : null).maxStackSize(64);
+        return new Properties().tab(hasTab ? tabFlyingThings : null).stacksTo(64);
     }
 }

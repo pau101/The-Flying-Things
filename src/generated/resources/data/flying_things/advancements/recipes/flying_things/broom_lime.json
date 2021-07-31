@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "flying_things:broom_lime"
+    ]
+  },
+  "criteria": {
+    "has_lime": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:lime_dye"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "flying_things:broom_lime"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_lime",
+      "has_the_recipe"
+    ]
+  ]
+}
